@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel分类整理工具</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Excel分类整理工具</h1>
+        <p>根据匹配条件自动分类Excel数据</p>
+        <a href="../index.html" class="back-link">返回首页</a>
+    </header>
+    
+    <main>
+        <div class="tool-container">
+            <div class="config-panel">
+                <h2>配置参数</h2>
+                
+                <div class="form-group">
+                    <label for="excelFile">选择Excel文件:</label>
+                    <input type="file" id="excelFile" accept=".xlsx, .xls">
+                </div>
+                
+                <div class="form-group">
+                    <label for="sheetName">工作表名称(可选):</label>
+                    <input type="text" id="sheetName" placeholder="留空则使用第一个工作表">
+                </div>
+                
+                <div class="form-group">
+                    <label for="matchColumn">匹配列(字母):</label>
+                    <input type="text" id="matchColumn" value="A" placeholder="例如: A, B, C等">
+                </div>
+                
+                <div class="form-group">
+                    <label>分类规则:</label>
+                    <div id="rulesContainer">
+                        <div class="rule-item">
+                            <input type="text" class="rule-name" placeholder="分类名称" value="分类1">
+                            <input type="text" class="rule-terms" placeholder="匹配关键词,用逗号分隔" value="北京,上海">
+                            <button class="remove-rule">删除</button>
+                        </div>
+                    </div>
+                    <button id="addRule">添加规则</button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="outputOption">输出选项:</label>
+                    <select id="outputOption">
+                        <option value="single">单个Excel文件(多工作表)</option>
+                        <option value="multiple">多个Excel文件(每个分类一个文件)</option>
+                        <option value="zip">ZIP压缩包(包含所有分类文件)</option>
+                    </select>
+                </div>
+                
+                <button id="processBtn" class="primary-btn">开始处理</button>
+            </div>
+            
+            <div class="output-panel">
+                <h2>处理进度</h2>
+                <div id="progressContainer">
+                    <div id="progressBar"></div>
+                    <div id="progressText">准备就绪</div>
+                </div>
+                
+                <div id="logOutput"></div>
+                
+                <div id="resultSection" class="hidden">
+                    <h3>处理完成!</h3>
+                    <a id="downloadLink" class="download-btn">下载结果</a>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../js/excel-utils.js"></script>
+</body>
+</html>
