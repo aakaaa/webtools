@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>货币换算器</title>
+    <link rel="stylesheet" href="../../../assets/css/converter.css">
+</head>
+<body>
+    <div class="converter">
+        <input type="number" id="amount" placeholder="金额">
+        <select id="from-currency">
+            <option value="USD">美元 (USD)</option>
+            <option value="CNY">人民币 (CNY)</option>
+            <!-- 更多货币... -->
+        </select>
+        <span>→</span>
+        <select id="to-currency">
+            <option value="CNY">人民币 (CNY)</option>
+            <option value="USD">美元 (USD)</option>
+        </select>
+        <button id="convert">换算</button>
+        <div id="result"></div>
+    </div>
+    <script src="../../../assets/js/currency-converter.js"></script>
+</body>
+</html>
