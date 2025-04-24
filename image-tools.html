@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片工具箱</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <h1>图片工具箱</h1>
+        <p>图片格式转换、调整大小、ICO生成工具</p>
+        <a href="../index.html" class="back-link">返回首页</a>
+    </header>
+    
+    <main>
+        <div class="tool-tabs">
+            <button class="tab-btn active" data-tab="convert">图片转换</button>
+            <button class="tab-btn" data-tab="resize">调整大小</button>
+            <button class="tab-btn" data-tab="ico">ICO生成</button>
+            <button class="tab-btn" data-tab="compress">图片压缩</button>
+        </div>
+        
+        <!-- 图片转换 -->
+        <div id="convert-tab" class="tab-content active">
+            <div class="tool-container">
+                <div class="config-panel">
+                    <h2>图片格式转换</h2>
+                    
+                    <div class="form-group">
+                        <label for="imageConvertFile">选择图片文件:</label>
+                        <input type="file" id="imageConvertFile" accept="image/*">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="imageOutputFormat">输出格式:</label>
+                        <select id="imageOutputFormat">
+                            <option value="jpeg">JPEG</option>
+                            <option value="png">PNG</option>
+                            <option value="webp">WebP</option>
+                            <option value="bmp">BMP</option>
+                            <option value="gif">GIF</option>
+                        </select>
+                    </div>
+                    
+                    <div id="jpegOptions" class="form-group">
+                        <label for="jpegQuality">JPEG质量(0-100):</label>
+                        <input type="range" id="jpegQuality" min="0" max="100" value="80">
+                        <span id="jpegQualityValue">80</span>
+                    </div>
+                    
+                    <div id="pngOptions" class="form-group hidden">
+                        <label for="pngCompression">PNG压缩级别(0-9):</label>
+                        <input type="range" id="pngCompression" min="0" max="9" value="6">
+                        <span id="pngCompressionValue">6</span>
+                    </div>
+                    
+                    <button id="convertImageBtn" class="primary-btn">转换图片</button>
+                </div>
+                
+                <div class="output-panel">
+                    <h2>处理进度</h2>
+                    <div id="convertProgressContainer">
+                        <div id="convertProgressBar"></div>
+                        <div id="convertProgressText">准备就绪</div>
+                    </div>
+                    
+                    <div class="image-preview">
+                        <h3>预览</h3>
+                        <div class="preview-container">
+                            <div class="original-preview">
+                                <h4>原始图片</h4>
+                                <img id="originalImagePreview" src="" alt="原始图片">
+                                <div id="originalInfo"></div>
+                            </div>
+                            <div class="converted-preview">
+                                <h4>转换结果</h4>
+                                <img id="convertedImagePreview" src="" alt="转换结果">
+                                <div id="convertedInfo"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="convertResultSection" class="hidden">
+                        <a id="convertDownloadLink" class="download-btn">下载转换图片</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 调整大小 -->
+        <div id="resize-tab" class="tab-content">
+            <div class="tool-container">
+                <div class="config-panel">
+                    <h2>图片调整大小</h2>
+                    
+                    <div class="form-group">
+                        <label for="resizeImageFile">选择图片文件:</label>
+                        <input type="file" id="resizeImageFile" accept="image/*">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="resizeMode">调整模式:</label>
+                        <select id="resizeMode">
+                            <option value="percentage">按百分比</option>
+                            <option value="dimensions">按具体尺寸</option>
+                            <option value="longedge">按长边</option>
+                            <option value="shortedge">按短边</option>
+                        </select>
+                    </div>
+                    
+                    <div id="percentageOptions" class="form-group">
+                        <label for="resizePercentage">缩放百分比:</label>
+                        <input type="number" id="resizePercentage" min="1" max="500" value="50">
+                        <span>%</span>
+                    </div>
+                    
+                    <div id="dimensionsOptions" class="form-group hidden">
+                        <label for="resizeWidth">宽度:</label>
+                        <input type="number" id="resizeWidth" min="1" placeholder="像素">
+                        
+                        <label for="resizeHeight">高度:</label>
+                        <input type="number" id="resizeHeight" min="1" placeholder="像素">
+                        
+                        <div>
+                            <input type="checkbox" id="keepAspectRatio" checked>
+                            <label for="keepAspectRatio">保持宽高比</label>
+                        </div>
+                    </div>
+                    
+                    <div id="edgeOptions" class="form-group hidden">
+                        <label for="edgeLength">边长(像素):</label>
+                        <input type="number" id="edgeLength" min="1" value="800">
+                    </div>
+                    
+                    <button id="resizeImageBtn" class="primary-btn">调整大小</button>
+                </div>
+                
+                <div class="output-panel">
+                    <h2>处理进度</h2>
+                    <div id="resizeProgressContainer">
+                        <div id="resizeProgressBar"></div>
+                        <div id="resizeProgressText">准备就绪</div>
+                    </div>
+                    
+                    <div class="image-preview">
+                        <h3>预览</h3>
+                        <div class="preview-container">
+                            <div class="original-preview">
+                                <h4>原始图片</h4>
+                                <img id="originalResizePreview" src="" alt="原始图片">
+                                <div id="originalResizeInfo"></div>
+                            </div>
+                            <div class="resized-preview">
+                                <h4>调整结果</h4>
+                                <img id="resizedImagePreview" src="" alt="调整结果">
+                                <div id="resizedInfo"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="resizeResultSection" class="hidden">
+                        <a id="resizeDownloadLink" class="download-btn">下载调整后的图片</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ICO生成 -->
+        <div id="ico-tab" class="tab-content">
+            <div class="tool-container">
+                <div class="config-panel">
+                    <h2>ICO图标生成</h2>
+                    
+                    <div class="form-group">
+                        <label for="icoImageFile">选择图片文件:</label>
+                        <input type="file" id="icoImageFile" accept="image/*">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="icoSizes">图标尺寸(像素):</label>
+                        <div class="checkbox-group" id="icoSizes">
+                            <label><input type="checkbox" name="icoSize" value="16" checked> 16x16</label>
+                            <label><input type="checkbox" name="icoSize" value="24"> 24x24</label>
+                            <label><input type="checkbox" name="icoSize" value="32" checked> 32x32</label>
+                            <label><input type="checkbox" name="icoSize" value="48" checked> 48x48</label>
+                            <label><input type="checkbox" name="icoSize" value="64"> 64x64</label>
+                            <label><input type="checkbox" name="icoSize" value="128" checked> 128x128</label>
+                            <label><input type="checkbox" name="icoSize" value="256"> 256x256</label>
+                        </div>
+                    </div>
+                    
+                    <button id="generateIcoBtn" class="primary-btn">生成ICO文件</button>
+                </div>
+                
+                <div class="output-panel">
+                    <h2>处理进度</h2>
+                    <div id="icoProgressContainer">
+                        <div id="icoProgressBar"></div>
+                        <div id="icoProgressText">准备就绪</div>
+                    </div>
+                    
+                    <div class="image-preview">
+                        <h3>预览</h3>
+                        <img id="icoPreview" src="" alt="ICO预览">
+                        <div id="icoInfo"></div>
+                    </div>
+                    
+                    <div id="icoResultSection" class="hidden">
+                        <a id="icoDownloadLink" class="download-btn">下载ICO文件</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 图片压缩 -->
+        <div id="compress-tab" class="tab-content">
+            <div class="tool-container">
+                <div class="config-panel">
+                    <h2>图片压缩工具</h2>
+                    
+                    <div class="form-group">
+                        <label for="compressImageFile">选择图片文件:</label>
+                        <input type="file" id="compressImageFile" accept="image/*">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="compressFormat">输出格式:</label>
+                        <select id="compressFormat">
+                            <option value="original">保持原格式</option>
+                            <option value="jpeg">JPEG</option>
+                            <option value="png">PNG</option>
+                            <option value="webp">WebP</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="compressQuality">质量(0-100):</label>
+                        <input type="range" id="compressQuality" min="0" max="100" value="70">
+                        <span id="compressQualityValue">70</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="targetFileSize">目标文件大小(KB):</label>
+                        <input type="number" id="targetFileSize" min="1" placeholder="可选">
+                    </div>
+                    
+                    <button id="compressImageBtn" class="primary-btn">压缩图片</button>
+                </div>
+                
+                <div class="output-panel">
+                    <h2>处理进度</h2>
+                    <div id="compressProgressContainer">
+                        <div id="compressProgressBar"></div>
+                        <div id="compressProgressText">准备就绪</div>
+                    </div>
+                    
+                    <div class="image-preview">
+                        <h3>预览</h3>
+                        <div class="preview-container">
+                            <div class="original-preview">
+                                <h4>原始图片</h4>
+                                <img id="originalCompressPreview" src="" alt="原始图片">
+                                <div id="originalCompressInfo"></div>
+                            </div>
+                            <div class="compressed-preview">
+                                <h4>压缩结果</h4>
+                                <img id="compressedImagePreview" src="" alt="压缩结果">
+                                <div id="compressedInfo"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="compressResultSection" class="hidden">
+                        <div id="compressStats"></div>
+                        <a id="compressDownloadLink" class="download-btn">下载压缩图片</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../js/image-utils.js"></script>
+</body>
+</html>
