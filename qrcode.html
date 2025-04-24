@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>二维码生成器</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tool-styles.css">
+</head>
+<body>
+  <header>
+    <h1>二维码生成器</h1>
+    <p>创建和自定义二维码</p>
+    <a href="index.html" class="back-link">← 返回首页</a>
+  </header>
+
+  <main>
+    <div class="tool-container">
+      <div class="config-panel">
+        <h2>二维码设置</h2>
+        
+        <div class="form-group">
+          <label for="qrContent">二维码内容:</label>
+          <textarea id="qrContent" rows="3" placeholder="输入文本或URL"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="qrSize">二维码大小:</label>
+          <input type="range" id="qrSize" min="100" max="1000" value="300">
+          <span id="qrSizeValue">300px</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="qrColor">前景色:</label>
+          <input type="color" id="qrColor" value="#000000">
+        </div>
+        
+        <div class="form-group">
+          <label for="qrBgColor">背景色:</label>
+          <input type="color" id="qrBgColor" value="#FFFFFF">
+        </div>
+        
+        <div class="form-group">
+          <label for="qrErrorCorrection">纠错级别:</label>
+          <select id="qrErrorCorrection">
+            <option value="L">低 (7%)</option>
+            <option value="M" selected>中 (15%)</option>
+            <option value="Q">高 (25%)</option>
+            <option value="H">最高 (30%)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="qrMargin">边距:</label>
+          <input type="range" id="qrMargin" min="0" max="50" value="4">
+          <span id="qrMarginValue">4</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="qrLogo">添加Logo (可选):</label>
+          <input type="file" id="qrLogo" accept="image/*">
+        </div>
+        
+        <div class="form-group">
+          <label for="logoSize">Logo大小:</label>
+          <input type="range" id="logoSize" min="10" max="50" value="20" disabled>
+          <span id="logoSizeValue">20%</span>
+        </div>
+        
+        <button id="generateQrBtn" class="primary-btn">生成二维码</button>
+      </div>
+      
+      <div class="output-panel">
+        <h2>二维码预览</h2>
+        <div id="qrCodeContainer">
+          <canvas id="qrCanvas"></canvas>
+        </div>
+        
+        <div class="qr-actions hidden" id="qrActions">
+          <button id="downloadQrBtn" class="download-btn">下载二维码</button>
+          <div class="format-options">
+            <label>下载格式:</label>
+            <select id="qrFormat">
+              <option value="png">PNG</option>
+              <option value="jpeg">JPEG</option>
+              <option value="svg">SVG</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="lib/qrcode.min.js"></script>
+  <script src="js/qrcode.js"></script>
+</body>
+</html>
