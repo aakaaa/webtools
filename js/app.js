@@ -6,7 +6,12 @@
 // 全局状态管理
 const AppState = {
   currentTool: null,
-  isProcessing: false
+  isProcessing: false,
+  userPreferences: {
+    theme: 'light',
+    language: 'zh-CN',
+    recentTools: []
+  }
 };
 
 // DOM加载完成后初始化应用
@@ -15,6 +20,8 @@ document.addEventListener('DOMContentLoaded', function() {
   initGlobalEventListeners();
   initServiceWorker();
   setCopyrightYear();
+  loadUserPreferences();
+  initThemeToggle();
 });
 
 /**
@@ -24,26 +31,18 @@ function initToolNavigation() {
   // 获取当前页面路径确定当前工具
   const path = window.location.pathname.split('/').pop() || 'index.html';
   AppState.currentTool = path.replace('.html', '');
-
-  // 高亮当前导航项
+  
+  // 更新最近使用工具
   if (AppState.currentTool !== 'index') {
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-      if (link.getAttribute('href').includes(AppState.currentTool)) {
-        link.classList.add('active');
-      }
-    });
+    updateRecentTools(AppState.currentTool);
   }
 
-  // 初始化返回首页按钮
-  const backLinks = document.querySelectorAll('.back-link');
-  backLinks.forEach(link => {
-    link.addEventListener('click', function(e) {
-      if (window.history.length > 1) {
-        e.preventDefault();
-        window.history.back();
-      }
-    });
+  // 高亮当前导航项
+  const navLinks = document.querySelectorAll('.nav-link, .tool-card');
+  navLinks.forEach(link => {
+    if (link.getAttribute('href').includes(AppState.currentTool)) {
+      link.classList.add('active');
+    }
   });
 }
 
@@ -68,7 +67,8 @@ function initGlobalEventListeners() {
       e.preventDefault();
       this.classList.remove('dragover');
       
-      const fileInput = this.querySelector('input[type="file"]');
+      const fileInput = this.querySelector('input[type="file"]') || 
+                       document.querySelector(`#${this.id.replace('DropZone', 'Input')}`);
       if (fileInput) {
         fileInput.files = e.dataTransfer.files;
         const event = new Event('change');
@@ -97,7 +97,7 @@ function initGlobalEventListeners() {
  * 注册Service Worker
  */
 function initServiceWorker() {
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
     navigator.serviceWorker.register('/sw.js')
       .then(registration => {
         console.log('ServiceWorker注册成功:', registration.scope);
@@ -121,14 +121,95 @@ function setCopyrightYear() {
 }
 
 /**
+ * 初始化主题切换
+ */
+function initThemeToggle() {
+  const themeToggle = document.createElement('div');
+  themeToggle.className = 'theme-toggle';
+  themeToggle.innerHTML = `
+    <button id="themeToggleBtn">
+      <i class="fas fa-moon"></i>
+      <span>暗色模式</span>
+    </button>
+  `;
+  document.body.insertBefore(themeToggle, document.body.firstChild);
+  
+  document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+}
+
+/**
+ * 切换主题
+ */
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark-theme');
+  AppState.userPreferences.theme = isDark ? 'dark' : 'light';
+  saveUserPreferences();
+  
+  const btn = document.getElementById('themeToggleBtn');
+  btn.querySelector('i').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+  btn.querySelector('span').textContent = isDark ? '亮色模式' : '暗色模式';
+}
+
+/**
+ * 加载用户偏好设置
+ */
+function loadUserPreferences() {
+  const savedPrefs = localStorage.getItem('fileToolsPreferences');
+  if (savedPrefs) {
+    AppState.userPreferences = JSON.parse(savedPrefs);
+  }
+  
+  // 应用主题
+  if (AppState.userPreferences.theme === 'dark') {
+    document.body.classList.add('dark-theme');
+    const btn = document.getElementById('themeToggleBtn');
+    if (btn) {
+      btn.querySelector('i').className = 'fas fa-sun';
+      btn.querySelector('span').textContent = '亮色模式';
+    }
+  }
+}
+
+/**
+ * 保存用户偏好设置
+ */
+function saveUserPreferences() {
+  localStorage.setItem('fileToolsPreferences', JSON.stringify(AppState.userPreferences));
+}
+
+/**
+ * 更新最近使用工具
+ */
+function updateRecentTools(toolId) {
+  const recentTools = AppState.userPreferences.recentTools;
+  const index = recentTools.indexOf(toolId);
+  
+  if (index !== -1) {
+    recentTools.splice(index, 1);
+  }
+  
+  recentTools.unshift(toolId);
+  
+  // 最多保存5个最近工具
+  if (recentTools.length > 5) {
+    recentTools.pop();
+  }
+  
+  saveUserPreferences();
+}
+
+/**
  * 显示全局通知
- * @param {string} message 通知消息
- * @param {string} type 通知类型 (success, error, warning, info)
  */
 function showGlobalNotification(message, type = 'info') {
   const notification = document.createElement('div');
   notification.className = `global-notification ${type}`;
-  notification.textContent = message;
+  notification.innerHTML = `
+    <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 
+                   type === 'success' ? 'fa-check-circle' : 
+                   type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+    <span>${message}</span>
+  `;
   
   document.body.appendChild(notification);
   
@@ -142,9 +223,6 @@ function showGlobalNotification(message, type = 'info') {
 
 /**
  * 通用文件处理进度更新
- * @param {string} toolId 工具ID
- * @param {string} message 进度消息
- * @param {number|string} progress 进度百分比或'error'
  */
 function updateProgress(toolId, message, progress) {
   const progressText = document.getElementById(`${toolId}ProgressText`);
@@ -165,8 +243,6 @@ function updateProgress(toolId, message, progress) {
 
 /**
  * 添加日志条目
- * @param {string} toolId 工具ID
- * @param {string} message 日志消息
  */
 function addLog(toolId, message) {
   const logOutput = document.getElementById(`${toolId}LogOutput`);
@@ -181,8 +257,6 @@ function addLog(toolId, message) {
 
 /**
  * 读取文件为ArrayBuffer
- * @param {File} file 文件对象
- * @returns {Promise<ArrayBuffer>}
  */
 function readFileAsArrayBuffer(file) {
   return new Promise((resolve, reject) => {
@@ -195,8 +269,6 @@ function readFileAsArrayBuffer(file) {
 
 /**
  * 读取文件为DataURL
- * @param {File} file 文件对象
- * @returns {Promise<string>}
  */
 function readFileAsDataURL(file) {
   return new Promise((resolve, reject) => {
@@ -209,19 +281,16 @@ function readFileAsDataURL(file) {
 
 /**
  * 格式化文件大小
- * @param {number} bytes 字节数
- * @returns {string} 格式化后的文件大小
  */
 function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 }
 
 /**
  * 生成随机ID
- * @param {number} length ID长度
- * @returns {string} 随机ID
  */
 function generateRandomId(length = 8) {
   return Math.random().toString(36).substr(2, length);
@@ -229,9 +298,6 @@ function generateRandomId(length = 8) {
 
 /**
  * 节流函数
- * @param {Function} func 要节流的函数
- * @param {number} delay 延迟时间(ms)
- * @returns {Function} 节流后的函数
  */
 function throttle(func, delay = 100) {
   let lastCall = 0;
@@ -245,9 +311,6 @@ function throttle(func, delay = 100) {
 
 /**
  * 防抖函数
- * @param {Function} func 要防抖的函数
- * @param {number} delay 延迟时间(ms)
- * @returns {Function} 防抖后的函数
  */
 function debounce(func, delay = 100) {
   let timeoutId;
@@ -269,5 +332,6 @@ window.App = {
   formatFileSize,
   generateRandomId,
   throttle,
-  debounce
+  debounce,
+  state: AppState
 };
