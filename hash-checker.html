@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>文件哈希校验工具</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tool-styles.css">
+</head>
+<body>
+  <header>
+    <h1>文件哈希校验工具</h1>
+    <p>计算和验证文件的哈希值</p>
+    <a href="index.html" class="back-link">← 返回首页</a>
+  </header>
+
+  <main>
+    <div class="tool-tabs">
+      <button class="tab-btn active" data-tab="calculator">哈希计算器</button>
+      <button class="tab-btn" data-tab="verifier">哈希验证器</button>
+    </div>
+
+    <div id="calculator-tab" class="tab-content active">
+      <div class="tool-container">
+        <div class="config-panel">
+          <h2>哈希计算器</h2>
+          
+          <div class="form-group">
+            <label for="hashFileInput">选择文件:</label>
+            <input type="file" id="hashFileInput">
+            <div class="drop-zone" id="hashDropZone">
+              <p>或将文件拖放到此处</p>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>哈希算法:</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="hashAlgorithm" value="md5" checked> MD5</label>
+              <label><input type="checkbox" name="hashAlgorithm" value="sha1"> SHA-1</label>
+              <label><input type="checkbox" name="hashAlgorithm" value="sha256" checked> SHA-256</label>
+              <label><input type="checkbox" name="hashAlgorithm" value="sha512"> SHA-512</label>
+              <label><input type="checkbox" name="hashAlgorithm" value="crc32"> CRC32</label>
+            </div>
+          </div>
+          
+          <button id="calculateHashBtn" class="primary-btn">计算哈希值</button>
+        </div>
+        
+        <div class="output-panel">
+          <h2>哈希结果</h2>
+          <div id="hashResults">
+            <div class="result-item hidden" id="md5Result">
+              <span>MD5:</span>
+              <span id="md5Hash"></span>
+              <button class="copy-hash-btn" data-target="md5Hash">复制</button>
+            </div>
+            <div class="result-item hidden" id="sha1Result">
+              <span>SHA-1:</span>
+              <span id="sha1Hash"></span>
+              <button class="copy-hash-btn" data-target="sha1Hash">复制</button>
+            </div>
+            <div class="result-item hidden" id="sha256Result">
+              <span>SHA-256:</span>
+              <span id="sha256Hash"></span>
+              <button class="copy-hash-btn" data-target="sha256Hash">复制</button>
+            </div>
+            <div class="result-item hidden" id="sha512Result">
+              <span>SHA-512:</span>
+              <span id="sha512Hash"></span>
+              <button class="copy-hash-btn" data-target="sha512Hash">复制</button>
+            </div>
+            <div class="result-item hidden" id="crc32Result">
+              <span>CRC32:</span>
+              <span id="crc32Hash"></span>
+              <button class="copy-hash-btn" data-target="crc32Hash">复制</button>
+            </div>
+          </div>
+          
+          <div id="hashProgress" class="hidden">
+            <div class="progress-bar">
+              <div id="hashProgressBar" class="progress"></div>
+            </div>
+            <div id="hashProgressText">正在计算...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 哈希验证器标签页内容... -->
+  </main>
+
+  <script src="js/hash-checker.js"></script>
+</body>
+</html>
