@@ -534,12 +534,210 @@ button:disabled,
   }
 }
 
+/* 工具特定样式补充 */
+
+/* 文本处理工具 */
+.results-box {
+  background: #f8f9fa;
+  border-radius: var(--border-radius);
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.result-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+/* CSV/JSON转换器 */
+pre {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  max-height: 300px;
+  overflow: auto;
+  font-family: 'Courier New', Courier, monospace;
+  white-space: pre-wrap;
+}
+
+.tool-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* 文件批量重命名 */
+.file-list-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background: #f8f9fa;
+  position: sticky;
+  top: 0;
+}
+
+/* 图片水印工具 */
+.image-preview-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.original-preview, .watermarked-preview {
+  flex: 1;
+}
+
+.original-preview img, .watermarked-preview canvas {
+  max-width: 100%;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+}
+
+/* 音频工具 */
+.waveform-container {
+  width: 100%;
+  height: 150px;
+  background: #f8f9fa;
+  margin-bottom: 15px;
+}
+
+.audio-controls {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.control-btn {
+  padding: 8px 15px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+/* 视频转GIF */
+.video-preview video {
+  max-width: 100%;
+  border-radius: var(--border-radius);
+}
+
+/* 哈希校验工具 */
+.copy-hash-btn {
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  background: var(--gray-color);
+  color: white;
+  border: none;
+  border-radius: 3px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+/* 二维码生成器 */
+#qrCanvas {
+  max-width: 100%;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+}
+
+/* 差异比较工具 */
+.diff-inputs {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.diff-input {
+  flex: 1;
+}
+
+.diff-input textarea {
+  width: 100%;
+  min-height: 200px;
+}
+
+.diff-results {
+  margin-top: 20px;
+}
+
+/* 密码生成器 */
+.password-list {
+  margin: 15px 0;
+}
+
+.password-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: var(--border-radius);
+  margin-bottom: 8px;
+}
+
+.password-item span {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.copy-password-btn {
+  padding: 3px 8px;
+  font-size: 0.8rem;
+}
+
+.strength-bar {
+  width: 100px;
+  height: 10px;
+  background: #ddd;
+  border-radius: 5px;
+  display: inline-block;
+  margin: 0 10px;
+  vertical-align: middle;
+}
+
+.strength-indicator {
+  height: 100%;
+  border-radius: 5px;
+  width: 0%;
+  transition: width 0.3s;
+}
+
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .tool-container {
     flex-direction: column;
   }
+  .diff-inputs {
+    flex-direction: column;
+  }
   
+  .image-preview-container {
+    flex-direction: column;
+  }
   .config-panel {
     border-right: none;
     border-bottom: 1px solid #eee;
