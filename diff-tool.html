@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>文件差异比较工具</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tool-styles.css">
+</head>
+<body>
+  <header>
+    <h1>文件差异比较工具</h1>
+    <p>比较两个文件或文本的差异</p>
+    <a href="index.html" class="back-link">← 返回首页</a>
+  </header>
+
+  <main>
+    <div class="tool-tabs">
+      <button class="tab-btn active" data-tab="text">文本比较</button>
+      <button class="tab-btn" data-tab="file">文件比较</button>
+    </div>
+
+    <div id="text-tab" class="tab-content active">
+      <div class="tool-container">
+        <div class="diff-inputs">
+          <div class="diff-input">
+            <h3>原始文本</h3>
+            <textarea id="originalText" rows="15" placeholder="输入原始文本或粘贴内容"></textarea>
+          </div>
+          <div class="diff-input">
+            <h3>修改后文本</h3>
+            <textarea id="modifiedText" rows="15" placeholder="输入修改后的文本或粘贴内容"></textarea>
+          </div>
+        </div>
+        
+        <div class="diff-options">
+          <div class="form-group">
+            <label for="diffMode">比较模式:</label>
+            <select id="diffMode">
+              <option value="chars">字符级</option>
+              <option value="words" selected>词级</option>
+              <option value="lines">行级</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="ignoreWhitespace">忽略空白:</label>
+            <input type="checkbox" id="ignoreWhitespace" checked>
+          </div>
+          
+          <div class="form-group">
+            <label for="ignoreCase">忽略大小写:</label>
+            <input type="checkbox" id="ignoreCase">
+          </div>
+          
+          <button id="compareTextBtn" class="primary-btn">比较文本</button>
+        </div>
+        
+        <div class="diff-results hidden" id="textDiffResults">
+          <h3>比较结果</h3>
+          <div id="textDiffViewer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 文件比较标签页内容... -->
+  </main>
+
+  <script src="lib/diff.min.js"></script>
+  <script src="js/diff-tool.js"></script>
+</body>
+</html>
