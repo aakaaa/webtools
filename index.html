@@ -1,56 +1,132 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文件处理工具箱</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文件处理工具箱</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tool-styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>文件处理工具箱</h1>
-        <p>一站式文件转换与处理解决方案</p>
-    </header>
+  <header>
+    <h1>文件处理工具箱</h1>
+    <p>一站式文件转换与处理解决方案</p>
+  </header>
+  
+  <nav class="main-nav">
+    <ul>
+      <li><a href="excel-organizer.html"><i class="fas fa-table"></i> Excel分类整理</a></li>
+      <li><a href="file-merger.html"><i class="fas fa-file-export"></i> 文件合并工具</a></li>
+      <li><a href="pdf-tools.html"><i class="fas fa-file-pdf"></i> PDF工具箱</a></li>
+      <li><a href="image-tools.html"><i class="fas fa-image"></i> 图片工具箱</a></li>
+    </ul>
+  </nav>
+
+  <main class="tools-grid">
+    <!-- 原有工具 -->
+    <a href="excel-organizer.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-table"></i>
+      </div>
+      <h2>Excel分类整理</h2>
+      <p>根据匹配条件将Excel数据分类到不同工作表</p>
+    </a>
     
-    <main class="tools-grid">
-        <a href="excel-organizer.html" class="tool-card">
-            <div class="tool-icon">
-                <i class="fas fa-table"></i>
-            </div>
-            <h2>Excel分类整理</h2>
-            <p>根据匹配条件将Excel数据分类到不同工作表</p>
-        </a>
-        
-        <a href="file-merger.html" class="tool-card">
-            <div class="tool-icon">
-                <i class="fas fa-file-export"></i>
-            </div>
-            <h2>文件合并工具</h2>
-            <p>合并多个Excel文件为一个文件</p>
-        </a>
-        
-        <a href="pdf-tools.html" class="tool-card">
-            <div class="tool-icon">
-                <i class="fas fa-file-pdf"></i>
-            </div>
-            <h2>PDF工具箱</h2>
-            <p>PDF转换、合并、拆分、压缩等</p>
-        </a>
-        
-        <a href="image-tools.html" class="tool-card">
-            <div class="tool-icon">
-                <i class="fas fa-image"></i>
-            </div>
-            <h2>图片工具箱</h2>
-            <p>图片格式转换、调整大小、ICO生成等</p>
-        </a>
-    </main>
+    <a href="file-merger.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-file-export"></i>
+      </div>
+      <h2>文件合并工具</h2>
+      <p>合并多个Excel文件为一个文件</p>
+    </a>
     
-    <footer>
-        <p>© 2025 文件处理工具箱 | 使用HTML5/JavaScript构建</p>
-    </footer>
+    <!-- 新增工具 -->
+    <a href="text-tools.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-file-alt"></i>
+      </div>
+      <h2>文本处理工具</h2>
+      <p>多种文本处理功能集合</p>
+    </a>
     
-    <script src="js/app.js"></script>
+    <a href="csv-json.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-exchange-alt"></i>
+      </div>
+      <h2>CSV/JSON转换器</h2>
+      <p>轻松在CSV和JSON格式之间转换</p>
+    </a>
+    
+    <a href="rename-tool.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-tags"></i>
+      </div>
+      <h2>文件批量重命名</h2>
+      <p>批量重命名多个文件</p>
+    </a>
+    
+    <a href="watermark.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-stamp"></i>
+      </div>
+      <h2>图片水印工具</h2>
+      <p>为图片添加文字或图片水印</p>
+    </a>
+    
+    <a href="audio-tools.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-music"></i>
+      </div>
+      <h2>音频剪辑工具</h2>
+      <p>在线剪辑和编辑音频文件</p>
+    </a>
+    
+    <a href="video-gif.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-film"></i>
+      </div>
+      <h2>视频转GIF工具</h2>
+      <p>将视频片段转换为GIF动画</p>
+    </a>
+    
+    <a href="hash-checker.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-fingerprint"></i>
+      </div>
+      <h2>文件哈希校验</h2>
+      <p>计算和验证文件的哈希值</p>
+    </a>
+    
+    <a href="qrcode.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-qrcode"></i>
+      </div>
+      <h2>二维码生成器</h2>
+      <p>创建和自定义二维码</p>
+    </a>
+    
+    <a href="diff-tool.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-code-compare"></i>
+      </div>
+      <h2>文件差异比较</h2>
+      <p>比较两个文件或文本的差异</p>
+    </a>
+    
+    <a href="password-gen.html" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-key"></i>
+      </div>
+      <h2>密码生成器</h2>
+      <p>创建强密码和密码短语</p>
+    </a>
+  </main>
+  
+  <footer>
+    <p>© <span class="copyright-year"></span> 文件处理工具箱 | 使用HTML5/JavaScript构建</p>
+  </footer>
+  
+  <script src="js/app.js"></script>
 </body>
 </html>
