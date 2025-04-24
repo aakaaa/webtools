@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF工具箱</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.16.0/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>PDF工具箱</h1>
+        <p>PDF转换、合并、拆分、压缩工具</p>
+        <a href="../index.html" class="back-link">返回首页</a>
+    </header>
+    
+    <main>
+        <div class="tool-tabs">
+            <button class="tab-btn active" data-tab="merge">PDF合并</button>
+            <button class="tab-btn" data-tab="split">PDF拆分</button>
+            <button class="tab-btn" data-tab="compress">PDF压缩</button>
+            <button class="tab-btn" data-tab="convert">PDF转换</button>
+        </div>
+        
+        <!-- PDF合并 -->
+        <div id="merge-tab" class="tab-content active">
+            <div class="tool-container">
+                <div class="config-panel">
+                    <h2>PDF合并工具</h2>
+                    
+                    <div class="form-group">
+                        <label for="pdfMergeFiles">选择要合并的PDF文件:</label>
+                        <input type="file" id="pdfMergeFiles" accept=".pdf" multiple>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mergeOrder">合并顺序:</label>
+                        <select id="mergeOrder">
+                            <option value="filename">按文件名排序</option>
+                            <option value="upload">按上传顺序</option>
+                            <option value="custom">自定义顺序</option>
+                        </select>
+                    </div>
+                    
+                    <div id="customOrderContainer" class="hidden">
+                        <label>拖拽调整顺序:</label>
+                        <ul id="pdfSortableList" class="sortable-list"></ul>
+                    </div>
+                    
+                    <button id="mergePdfBtn" class="primary-btn">合并PDF</button>
+                </div>
+                
+                <div class="output-panel">
+                    <h2>处理进度</h2>
+                    <div id="mergeProgressContainer">
+                        <div id="mergeProgressBar"></div>
+                        <div id="mergeProgressText">准备就绪</div>
+                    </div>
+                    
+                    <div id="mergeLogOutput" class="log-output"></div>
+                    
+                    <div id="mergeResultSection" class="hidden">
+                        <h3>合并完成!</h3>
+                        <a id="mergeDownloadLink" class="download-btn">下载合并PDF</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PDF拆分 -->
+        <div id="split-tab" class="tab-content">
+            <div class="tool-container">
+                <div class="config-panel">
+                    <h2>PDF拆分工具</h2>
+                    
+                    <div class="form-group">
+                        <label for="pdfSplitFile">选择要拆分的PDF文件:</label>
+                        <input type="file" id="pdfSplitFile" accept=".pdf">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="splitMode">拆分方式:</label>
+                        <select id="splitMode">
+                            <option value="single">每页一个文件</option>
+                            <option value="range">按页码范围</option>
+                            <option value="bookmark">按书签</option>
+                        </select>
+                    </div>
+                    
+                    <div id="rangeOptions" class="form-group hidden">
+                        <label for="pageRanges">页码范围(如: 1-3,5,7-9):</label>
+                        <input type="text" id="pageRanges" placeholder="1-3,5,7-9">
+                    </div>
+                    
+                    <button id="splitPdfBtn" class="primary-btn">拆分PDF</button>
+                </div>
+                
+                <div class="output-panel">
+                    <h2>处理进度</h2>
+                    <div id="splitProgressContainer">
+                        <div id="splitProgressBar"></div>
+                        <div id="splitProgressText">准备就绪</div>
+                    </div>
+                    
+                    <div id="splitLogOutput" class="log-output"></div>
+                    
+                    <div id="splitResultSection" class="hidden">
+                        <h3>拆分完成!</h3>
+                        <a id="splitDownloadLink" class="download-btn">下载拆分文件(ZIP)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PDF压缩 -->
+        <div id="compress-tab" class="tab-content">
+            <div class="tool-container">
+                <div class="config-panel">
+                    <h2>PDF压缩工具</h2>
+                    
+                    <div class="form-group">
+                        <label for="pdfCompressFile">选择要压缩的PDF文件:</label>
+                        <input type="file" id="pdfCompressFile" accept=".pdf">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="compressLevel">压缩级别:</label>
+                        <select id="compressLevel">
+                            <option value="low">低压缩(高质量)</option>
+                            <option value="medium" selected>中等压缩(平衡质量)</option>
+                            <option value="high">高压缩(文件最小)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="targetSize">目标大小(MB,可选):</label>
+                        <input type="number" id="targetSize" min="0.1" step="0.1" placeholder="例如: 2.5">
+                    </div>
+                    
+                    <button id="compressPdfBtn" class="primary-btn">压缩PDF</button>
+                </div>
+                
+                <div class="output-panel">
+                    <h2>处理进度</h2>
+                    <div id="compressProgressContainer">
+                        <div id="compressProgressBar"></div>
+                        <div id="compressProgressText">准备就绪</div>
+                    </div>
+                    
+                    <div id="compressLogOutput" class="log-output"></div>
+                    
+                    <div id="compressResultSection" class="hidden">
+                        <h3>压缩完成!</h3>
+                        <div id="compressStats"></div>
+                        <a id="compressDownloadLink" class="download-btn">下载压缩PDF</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PDF转换 -->
+        <div id="convert-tab" class="tab-content">
+            <div class="tool-container">
+                <div class="config-panel">
+                    <h2>PDF转换工具</h2>
+                    
+                    <div class="form-group">
+                        <label for="convertFile">选择要转换的文件:</label>
+                        <input type="file" id="convertFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="convertDirection">转换方向:</label>
+                        <select id="convertDirection">
+                            <option value="topdf">转为PDF</option>
+                            <option value="frompdf">从PDF转换</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="convertFormat">目标格式:</label>
+                        <select id="convertFormat">
+                            <option value="pdf">PDF</option>
+                            <option value="docx">Word (DOCX)</option>
+                            <option value="xlsx">Excel (XLSX)</option>
+                            <option value="jpg">JPEG 图像</option>
+                            <option value="png">PNG 图像</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="convertOptions">转换选项:</label>
+                        <div>
+                            <input type="checkbox" id="ocrCheckbox" checked>
+                            <label for="ocrCheckbox">启用OCR(识别文本)</label>
+                        </div>
+                    </div>
+                    
+                    <button id="convertBtn" class="primary-btn">开始转换</button>
+                </div>
+                
+                <div class="output-panel">
+                    <h2>处理进度</h2>
+                    <div id="convertProgressContainer">
+                        <div id="convertProgressBar"></div>
+                        <div id="convertProgressText">准备就绪</div>
+                    </div>
+                    
+                    <div id="convertLogOutput" class="log-output"></div>
+                    
+                    <div id="convertResultSection" class="hidden">
+                        <h3>转换完成!</h3>
+                        <a id="convertDownloadLink" class="download-btn">下载转换文件</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../js/pdf-utils.js"></script>
+</body>
+</html>
