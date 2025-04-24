@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>CSV/JSON转换器</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tool-styles.css">
+</head>
+<body>
+  <header>
+    <h1>CSV/JSON转换器</h1>
+    <p>轻松在CSV和JSON格式之间转换</p>
+    <a href="index.html" class="back-link">← 返回首页</a>
+  </header>
+
+  <main>
+    <div class="tool-tabs">
+      <button class="tab-btn active" data-tab="csv2json">CSV转JSON</button>
+      <button class="tab-btn" data-tab="json2csv">JSON转CSV</button>
+    </div>
+
+    <div id="csv2json-tab" class="tab-content active">
+      <div class="tool-container">
+        <div class="config-panel">
+          <h2>CSV转JSON</h2>
+          <div class="form-group">
+            <label for="csvInput">输入CSV或上传文件:</label>
+            <textarea id="csvInput" rows="10" placeholder="粘贴CSV数据或拖放文件到此处"></textarea>
+            <input type="file" id="csvFileInput" accept=".csv,.txt">
+          </div>
+          <div class="form-group">
+            <label for="csvDelimiter">分隔符:</label>
+            <select id="csvDelimiter">
+              <option value=",">逗号 (,)</option>
+              <option value=";">分号 (;)</option>
+              <option value="\t">制表符 (\t)</option>
+              <option value="|">竖线 (|)</option>
+              <option value="custom">自定义</option>
+            </select>
+            <input type="text" id="customDelimiter" class="hidden" placeholder="输入自定义分隔符">
+          </div>
+          <div class="form-group">
+            <label for="csvHasHeader">第一行是表头:</label>
+            <input type="checkbox" id="csvHasHeader" checked>
+          </div>
+          <button id="convertToJsonBtn" class="primary-btn">转换为JSON</button>
+        </div>
+        <div class="output-panel">
+          <h2>JSON输出</h2>
+          <pre id="jsonOutput" contenteditable="true"></pre>
+          <div class="tool-buttons">
+            <button id="copyJsonBtn" class="secondary-btn">复制JSON</button>
+            <button id="downloadJsonBtn" class="secondary-btn">下载JSON</button>
+            <button id="formatJsonBtn" class="secondary-btn">格式化</button>
+            <button id="minifyJsonBtn" class="secondary-btn">压缩</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JSON转CSV标签页内容... -->
+  </main>
+
+  <script src="js/csv-json.js"></script>
+</body>
+</html>
