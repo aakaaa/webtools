@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>文本处理工具</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tool-styles.css">
+</head>
+<body>
+  <header>
+    <h1>文本文件处理工具</h1>
+    <p>多种文本处理功能集合</p>
+    <a href="index.html" class="back-link">← 返回首页</a>
+  </header>
+
+  <main>
+    <div class="tool-tabs">
+      <button class="tab-btn active" data-tab="counter">字数统计</button>
+      <button class="tab-btn" data-tab="case">大小写转换</button>
+      <button class="tab-btn" data-tab="replace">查找替换</button>
+      <button class="tab-btn" data-tab="lines">行处理</button>
+    </div>
+
+    <div id="counter-tab" class="tab-content active">
+      <!-- 字数统计功能界面 -->
+      <div class="tool-container">
+        <div class="config-panel">
+          <h2>字数统计</h2>
+          <div class="form-group">
+            <label for="textInput">输入文本或上传文件:</label>
+            <textarea id="textInput" rows="10" placeholder="在此输入文本或拖放文件到此处"></textarea>
+            <input type="file" id="textFileInput" accept=".txt,.md,.csv,.json,.xml,.html,.js,.css">
+          </div>
+          <button id="countBtn" class="primary-btn">统计</button>
+        </div>
+        <div class="output-panel">
+          <h2>统计结果</h2>
+          <div id="counterResults" class="results-box">
+            <div class="result-item">
+              <span>字符数(含空格):</span>
+              <span id="charCountWithSpaces">0</span>
+            </div>
+            <div class="result-item">
+              <span>字符数(不含空格):</span>
+              <span id="charCountWithoutSpaces">0</span>
+            </div>
+            <div class="result-item">
+              <span>单词数:</span>
+              <span id="wordCount">0</span>
+            </div>
+            <div class="result-item">
+              <span>行数:</span>
+              <span id="lineCount">0</span>
+            </div>
+          </div>
+          <button id="copyCounterResults" class="secondary-btn">复制结果</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 其他标签页内容... -->
+  </main>
+
+  <script src="js/text-tools.js"></script>
+</body>
+</html>
