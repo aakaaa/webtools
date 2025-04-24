@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>图片水印工具</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tool-styles.css">
+</head>
+<body>
+  <header>
+    <h1>图片水印添加工具</h1>
+    <p>为图片添加文字或图片水印</p>
+    <a href="index.html" class="back-link">← 返回首页</a>
+  </header>
+
+  <main>
+    <div class="tool-tabs">
+      <button class="tab-btn active" data-tab="text">文字水印</button>
+      <button class="tab-btn" data-tab="image">图片水印</button>
+    </div>
+
+    <div id="text-tab" class="tab-content active">
+      <div class="tool-container">
+        <div class="config-panel">
+          <h2>文字水印设置</h2>
+          
+          <div class="form-group">
+            <label for="sourceImage">选择图片:</label>
+            <input type="file" id="sourceImage" accept="image/*">
+            <div class="drop-zone" id="imageDropZone">
+              <p>或将图片拖放到此处</p>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="watermarkText">水印文字:</label>
+            <input type="text" id="watermarkText" value="我的水印">
+          </div>
+          
+          <div class="form-group">
+            <label for="textColor">文字颜色:</label>
+            <input type="color" id="textColor" value="#FFFFFF">
+            <label for="textOpacity">透明度:</label>
+            <input type="range" id="textOpacity" min="10" max="100" value="70">
+            <span id="textOpacityValue">70%</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="textSize">文字大小:</label>
+            <input type="range" id="textSize" min="10" max="100" value="24">
+            <span id="textSizeValue">24px</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="textFont">字体:</label>
+            <select id="textFont">
+              <option value="Arial">Arial</option>
+              <option value="Microsoft YaHei" selected>微软雅黑</option>
+              <option value="SimSun">宋体</option>
+              <option value="KaiTi">楷体</option>
+              <option value="Courier New">Courier New</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="textAngle">旋转角度:</label>
+            <input type="range" id="textAngle" min="0" max="360" value="0">
+            <span id="textAngleValue">0°</span>
+          </div>
+          
+          <div class="form-group">
+            <label for="watermarkPosition">水印位置:</label>
+            <select id="watermarkPosition">
+              <option value="center">居中</option>
+              <option value="top-left">左上</option>
+              <option value="top-right">右上</option>
+              <option value="bottom-left">左下</option>
+              <option value="bottom-right">右下</option>
+              <option value="tile">平铺</option>
+            </select>
+          </div>
+          
+          <button id="applyTextWatermarkBtn" class="primary-btn">应用水印</button>
+        </div>
+        
+        <div class="output-panel">
+          <h2>预览</h2>
+          <div class="image-preview-container">
+            <div class="original-preview">
+              <h3>原始图片</h3>
+              <img id="originalImagePreview" src="" alt="原始图片">
+            </div>
+            <div class="watermarked-preview">
+              <h3>加水印后</h3>
+              <canvas id="watermarkedCanvas"></canvas>
+            </div>
+          </div>
+          
+          <div class="watermark-actions hidden" id="textWatermarkActions">
+            <button id="downloadTextWatermarkBtn" class="download-btn">下载图片</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 图片水印标签页内容... -->
+  </main>
+
+  <script src="js/watermark.js"></script>
+</body>
+</html>
