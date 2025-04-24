@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>文件批量重命名</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tool-styles.css">
+</head>
+<body>
+  <header>
+    <h1>文件批量重命名工具</h1>
+    <p>批量重命名多个文件</p>
+    <a href="index.html" class="back-link">← 返回首页</a>
+  </header>
+
+  <main>
+    <div class="tool-container">
+      <div class="config-panel">
+        <h2>重命名设置</h2>
+        <div class="form-group">
+          <label for="fileInput">选择文件:</label>
+          <input type="file" id="fileInput" multiple>
+          <div class="drop-zone" id="renameDropZone">
+            <p>或将文件拖放到此处</p>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="renamePattern">命名模式:</label>
+          <input type="text" id="renamePattern" placeholder="例如: 图片_{INDEX}_{DATE}" value="{ORIGINAL}">
+          <small class="hint">可用变量: {INDEX}, {DATE}, {TIME}, {ORIGINAL}, {EXT}</small>
+        </div>
+        
+        <div class="form-group">
+          <label for="startIndex">起始序号:</label>
+          <input type="number" id="startIndex" min="1" value="1">
+        </div>
+        
+        <div class="form-group">
+          <label for="dateFormat">日期格式:</label>
+          <select id="dateFormat">
+            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+            <option value="YYYYMMDD">YYYYMMDD</option>
+            <option value="DD-MM-YYYY">DD-MM-YYYY</option>
+            <option value="MM-DD-YYYY">MM-DD-YYYY</option>
+          </select>
+        </div>
+        
+        <button id="previewRenameBtn" class="primary-btn">预览重命名</button>
+        <button id="applyRenameBtn" class="primary-btn hidden">应用重命名</button>
+      </div>
+      
+      <div class="output-panel">
+        <h2>文件列表</h2>
+        <div class="file-list-container">
+          <table id="fileListTable">
+            <thead>
+              <tr>
+                <th>原始名称</th>
+                <th>新名称</th>
+                <th>大小</th>
+              </tr>
+            </thead>
+            <tbody id="fileListBody">
+              <!-- 文件列表将在这里动态生成 -->
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="rename-actions hidden" id="renameActions">
+          <button id="downloadRenamedBtn" class="download-btn">下载全部重命名文件</button>
+          <button id="downloadZipBtn" class="secondary-btn">下载为ZIP</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/rename-tool.js"></script>
+</body>
+</html>
