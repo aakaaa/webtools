@@ -1,0 +1,2200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>汉字塔防</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f0f0f0;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #header {
+            background-color: #333;
+            color: white;
+            padding: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        #game-board {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            background-color: #222;
+        }
+        
+        #grid-container {
+            display: grid;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .grid-cell {
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+        
+        .path {
+            background-color: #4a3420;
+        }
+        
+        .tower {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .enemy {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            z-index: 5;
+            transition: left 0.1s linear, top 0.1s linear;
+        }
+        
+        .base {
+            background-color: #d32f2f;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .base-health {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background-color: #4caf50;
+        }
+        
+        #controls {
+            background-color: #444;
+            padding: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 5px;
+        }
+        
+        .btn {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .btn:hover {
+            background-color: #666;
+        }
+        
+        .btn:active {
+            background-color: #777;
+        }
+        
+        .btn-primary {
+            background-color: #2196F3;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0b7dda;
+        }
+        
+        .btn-danger {
+            background-color: #f44336;
+        }
+        
+        .btn-danger:hover {
+            background-color: #da190b;
+        }
+        
+        .btn-success {
+            background-color: #4CAF50;
+        }
+        
+        .btn-success:hover {
+            background-color: #46a049;
+        }
+        
+        #tower-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 100;
+            display: none;
+            width: 80%;
+            max-width: 300px;
+        }
+        
+        #tower-info h3 {
+            margin-bottom: 10px;
+            color: #ffeb3b;
+        }
+        
+        #tower-info p {
+            margin: 5px 0;
+        }
+        
+        #tower-info-close {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        #tower-upgrade {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px;
+            margin-top: 10px;
+            width: 100%;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        #tower-sell {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 8px;
+            margin-top: 5px;
+            width: 100%;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #modal {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        #modal h2 {
+            color: #ffeb3b;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        #modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        #shop-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .shop-item {
+            background-color: #444;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .shop-item:hover {
+            background-color: #555;
+        }
+        
+        .shop-item h4 {
+            color: #2196F3;
+            margin-bottom: 5px;
+        }
+        
+        .resource {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .resource-icon {
+            font-size: 16px;
+        }
+        
+        .gold {
+            color: gold;
+        }
+        
+        .crystal {
+            color: cyan;
+        }
+        
+        #wave-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 50;
+            font-size: 14px;
+        }
+        
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        #game-over h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ff5252;
+        }
+        
+        #level-complete {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 150;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        #level-complete h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+        
+        .status-effect {
+            position: absolute;
+            font-size: 10px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 2px 4px;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+        
+        .projectile {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: yellow;
+            border-radius: 50%;
+            z-index: 8;
+        }
+        
+        #tower-select {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+            z-index: 90;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            max-width: 90%;
+        }
+        
+        .tower-option {
+            background-color: #444;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .tower-option:hover {
+            background-color: #555;
+        }
+        
+        #tutorial {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 300;
+            width: 90%;
+            max-width: 400px;
+            display: none;
+        }
+        
+        #tutorial h2 {
+            color: #ffeb3b;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        #tutorial-content {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        #tutorial-nav {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        #achievements-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 50;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        #achievements-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 300;
+            width: 90%;
+            max-width: 400px;
+            display: none;
+        }
+        
+        .achievement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        .achievement-icon {
+            font-size: 24px;
+            margin-right: 10px;
+            color: #ffeb3b;
+        }
+        
+        .achievement-locked .achievement-icon {
+            color: #777;
+        }
+        
+        .achievement-info {
+            flex-grow: 1;
+        }
+        
+        .achievement-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        
+        .achievement-desc {
+            font-size: 12px;
+            color: #ccc;
+        }
+        
+        @media (max-width: 480px) {
+            .btn {
+                padding: 6px 8px;
+                font-size: 12px;
+                min-width: 60px;
+            }
+            
+            #header {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="header">
+            <div class="resource gold">
+                <span class="resource-icon">💰</span>
+                <span id="gold-display">0</span>
+            </div>
+            <div class="resource crystal">
+                <span class="resource-icon">💎</span>
+                <span id="crystal-display">0</span>
+            </div>
+            <div>
+                关卡: <span id="level-display">1</span>/9999
+            </div>
+        </div>
+        
+        <div id="game-board">
+            <div id="grid-container"></div>
+            <div id="wave-info">波次: 0/0</div>
+            <button id="achievements-btn">成就</button>
+            
+            <div id="tower-select"></div>
+            
+            <div id="tower-info">
+                <span id="tower-info-close">×</span>
+                <h3 id="tower-name">塔</h3>
+                <p>等级: <span id="tower-level">1</span></p>
+                <p>伤害: <span id="tower-damage">0</span></p>
+                <p>范围: <span id="tower-range">0</span></p>
+                <p>攻速: <span id="tower-speed">0</span></p>
+                <p>效果: <span id="tower-effect">无</span></p>
+                <button id="tower-upgrade">升级 (💰<span id="upgrade-cost">0</span>)</button>
+                <button id="tower-sell">出售 (💰<span id="sell-value">0</span>)</button>
+            </div>
+            
+            <div id="game-over">
+                <h2>游戏结束</h2>
+                <p>你坚持到了第 <span id="final-wave">0</span> 波</p>
+                <button class="btn btn-primary" id="restart-btn">重新开始</button>
+            </div>
+            
+            <div id="level-complete">
+                <h2>关卡完成!</h2>
+                <p>获得金币: <span id="reward-gold">0</span></p>
+                <p>获得水晶: <span id="reward-crystal">0</span></p>
+                <button class="btn btn-success" id="next-level-btn">下一关</button>
+            </div>
+        </div>
+        
+        <div id="controls">
+            <button class="btn btn-primary" id="start-wave-btn">开始波次</button>
+            <button class="btn" id="shop-btn">商店</button>
+            <button class="btn" id="tutorial-btn">教程</button>
+            <button class="btn btn-danger" id="menu-btn">菜单</button>
+        </div>
+    </div>
+    
+    <div id="modal-overlay">
+        <div id="modal">
+            <span id="modal-close">×</span>
+            <h2 id="modal-title">商店</h2>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+    
+    <div id="tutorial">
+        <h2>游戏教程</h2>
+        <div id="tutorial-content"></div>
+        <div id="tutorial-nav">
+            <button class="btn" id="tutorial-prev">上一页</button>
+            <span id="tutorial-page">1/5</span>
+            <button class="btn btn-primary" id="tutorial-next">下一页</button>
+        </div>
+    </div>
+    
+    <div id="achievements-panel">
+        <h2>成就</h2>
+        <div id="achievements-list"></div>
+        <button class="btn btn-primary" id="close-achievements-btn">关闭</button>
+    </div>
+
+    <script>
+        // 游戏状态
+        const GameState = {
+            READY: 'ready',
+            WAVE_IN_PROGRESS: 'wave_in_progress',
+            GAME_OVER: 'game_over',
+            LEVEL_COMPLETE: 'level_complete'
+        };
+        
+        // 游戏配置
+        const Config = {
+            GRID_SIZE: 10,
+            TOWER_TYPES: ['火', '水', '风', '土', '雷'],
+            TOWER_COLORS: ['#f44336', '#2196F3', '#4CAF50', '#795548', '#9C27B0'],
+            ENEMY_TYPES: ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'],
+            ENEMY_COLORS: ['#FF9800', '#FF5722', '#E91E63', '#673AB7', '#3F51B5', '#00BCD4', '#009688', '#8BC34A', '#CDDC39', '#FFEB3B'],
+            STATUS_EFFECTS: ['燃烧', '冰冻', '中毒', '眩晕', '减速'],
+            STATUS_COLORS: ['#f44336', '#2196F3', '#4CAF50', '#FF9800', '#9C27B0'],
+            BASE_HEALTH: 100,
+            INITIAL_GOLD: 100,
+            INITIAL_CRYSTAL: 10,
+            GOLD_PER_LEVEL: 50,
+            CRYSTAL_PER_LEVEL: 2,
+            TOWER_BASE_COST: 50,
+            UPGRADE_COST_MULTIPLIER: 1.5,
+            SELL_RATIO: 0.7,
+            WAVE_DELAY: 2000,
+            ENEMY_SPAWN_DELAY: 500,
+            PROJECTILE_SPEED: 10,
+            STATUS_DURATION: 3000,
+            ACHIEVEMENTS: [
+                { id: 'first_blood', name: '第一滴血', desc: '击败第一个敌人', reward: { gold: 50, crystal: 1 }, unlocked: false },
+                { id: 'tower_master', name: '塔防大师', desc: '建造所有类型的塔', reward: { gold: 100, crystal: 5 }, unlocked: false },
+                { id: 'level_10', name: '初露锋芒', desc: '通过第10关', reward: { gold: 200, crystal: 10 }, unlocked: false },
+                { id: 'level_100', name: '百关斩将', desc: '通过第100关', reward: { gold: 1000, crystal: 50 }, unlocked: false },
+                { id: 'millionaire', name: '百万富翁', desc: '累计获得10000金币', reward: { gold: 500, crystal: 20 }, unlocked: false },
+                { id: 'crystal_king', name: '水晶之王', desc: '累计获得500水晶', reward: { gold: 1000, crystal: 100 }, unlocked: false },
+                { id: 'perfect_10', name: '完美防御', desc: '在不损失基地生命值的情况下通过10关', reward: { gold: 300, crystal: 15 }, unlocked: false },
+                { id: 'speed_runner', name: '速通者', desc: '在10秒内完成一关', reward: { gold: 200, crystal: 10 }, unlocked: false },
+                { id: 'tower_specialist', name: '塔防专家', desc: '将一座塔升级到10级', reward: { gold: 500, crystal: 25 }, unlocked: false },
+                { id: 'status_master', name: '状态大师', desc: '触发所有类型的状态效果', reward: { gold: 300, crystal: 20 }, unlocked: false }
+            ]
+        };
+        
+        // 游戏数据
+        let gameData = {
+            state: GameState.READY,
+            level: 1,
+            gold: Config.INITIAL_GOLD,
+            crystal: Config.INITIAL_CRYSTAL,
+            totalGold: Config.INITIAL_GOLD,
+            totalCrystal: Config.INITIAL_CRYSTAL,
+            baseHealth: Config.BASE_HEALTH,
+            maxBaseHealth: Config.BASE_HEALTH,
+            wave: 0,
+            maxWave: 3,
+            enemies: [],
+            towers: [],
+            projectiles: [],
+            statusEffects: [],
+            path: [],
+            grid: [],
+            selectedCell: null,
+            upgrades: {
+                fire: 0,
+                water: 0,
+                wind: 0,
+                earth: 0,
+                thunder: 0
+            },
+            achievements: JSON.parse(JSON.stringify(Config.ACHIEVEMENTS)),
+            stats: {
+                enemiesKilled: 0,
+                towersBuilt: 0,
+                perfectLevels: 0,
+                fastestLevel: Infinity,
+                totalPlayTime: 0,
+                towersByType: {
+                    fire: 0,
+                    water: 0,
+                    wind: 0,
+                    earth: 0,
+                    thunder: 0
+                },
+                statusApplied: {
+                    burn: 0,
+                    freeze: 0,
+                    poison: 0,
+                    stun: 0,
+                    slow: 0
+                }
+            },
+            startTime: Date.now(),
+            perfectLevel: true
+        };
+        
+        // DOM元素
+        const elements = {
+            gameContainer: document.getElementById('game-container'),
+            gridContainer: document.getElementById('grid-container'),
+            goldDisplay: document.getElementById('gold-display'),
+            crystalDisplay: document.getElementById('crystal-display'),
+            levelDisplay: document.getElementById('level-display'),
+            waveInfo: document.getElementById('wave-info'),
+            startWaveBtn: document.getElementById('start-wave-btn'),
+            shopBtn: document.getElementById('shop-btn'),
+            tutorialBtn: document.getElementById('tutorial-btn'),
+            menuBtn: document.getElementById('menu-btn'),
+            towerInfo: document.getElementById('tower-info'),
+            towerName: document.getElementById('tower-name'),
+            towerLevel: document.getElementById('tower-level'),
+            towerDamage: document.getElementById('tower-damage'),
+            towerRange: document.getElementById('tower-range'),
+            towerSpeed: document.getElementById('tower-speed'),
+            towerEffect: document.getElementById('tower-effect'),
+            upgradeCost: document.getElementById('upgrade-cost'),
+            sellValue: document.getElementById('sell-value'),
+            towerUpgrade: document.getElementById('tower-upgrade'),
+            towerSell: document.getElementById('tower-sell'),
+            towerInfoClose: document.getElementById('tower-info-close'),
+            modalOverlay: document.getElementById('modal-overlay'),
+            modal: document.getElementById('modal'),
+            modalTitle: document.getElementById('modal-title'),
+            modalContent: document.getElementById('modal-content'),
+            modalClose: document.getElementById('modal-close'),
+            gameOver: document.getElementById('game-over'),
+            finalWave: document.getElementById('final-wave'),
+            restartBtn: document.getElementById('restart-btn'),
+            levelComplete: document.getElementById('level-complete'),
+            rewardGold: document.getElementById('reward-gold'),
+            rewardCrystal: document.getElementById('reward-crystal'),
+            nextLevelBtn: document.getElementById('next-level-btn'),
+            towerSelect: document.getElementById('tower-select'),
+            tutorialPanel: document.getElementById('tutorial'),
+            tutorialContent: document.getElementById('tutorial-content'),
+            tutorialPage: document.getElementById('tutorial-page'),
+            tutorialPrev: document.getElementById('tutorial-prev'),
+            tutorialNext: document.getElementById('tutorial-next'),
+            achievementsBtn: document.getElementById('achievements-btn'),
+            achievementsPanel: document.getElementById('achievements-panel'),
+            achievementsList: document.getElementById('achievements-list'),
+            closeAchievementsBtn: document.getElementById('close-achievements-btn')
+        };
+        
+        // 初始化游戏
+        function initGame() {
+            loadGameData();
+            createGrid();
+            generateLevel();
+            updateUI();
+            bindEvents();
+            
+            // 显示首次游戏教程
+            if (gameData.level === 1 && gameData.totalPlayTime === 0) {
+                showTutorial();
+            }
+        }
+        
+        // 创建游戏网格
+        function createGrid() {
+            elements.gridContainer.innerHTML = '';
+            elements.gridContainer.style.gridTemplateColumns = `repeat(${Config.GRID_SIZE}, 1fr)`;
+            elements.gridContainer.style.gridTemplateRows = `repeat(${Config.GRID_SIZE}, 1fr)`;
+            
+            gameData.grid = [];
+            
+            for (let y = 0; y < Config.GRID_SIZE; y++) {
+                gameData.grid[y] = [];
+                for (let x = 0; x < Config.GRID_SIZE; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    
+                    // 随机背景颜色
+                    const hue = Math.floor(Math.random() * 360);
+                    cell.style.backgroundColor = `hsl(${hue}, 30%, 15%)`;
+                    
+                    elements.gridContainer.appendChild(cell);
+                    gameData.grid[y][x] = { x, y, element: cell, isPath: false, isBase: false };
+                }
+            }
+        }
+        
+        // 生成关卡
+        function generateLevel() {
+            // 重置游戏状态
+            gameData.state = GameState.READY;
+            gameData.wave = 0;
+            gameData.maxWave = Math.floor(gameData.level / 5) + 3;
+            gameData.enemies = [];
+            gameData.towers = [];
+            gameData.projectiles = [];
+            gameData.statusEffects = [];
+            gameData.path = [];
+            gameData.perfectLevel = true;
+            gameData.startTime = Date.now();
+            
+            // 清除所有敌人和塔
+            document.querySelectorAll('.enemy, .tower, .projectile, .status-effect').forEach(el => el.remove());
+            
+            // 生成路径
+            generatePath();
+            
+            // 更新UI
+            updateUI();
+        }
+        
+        // 生成敌人路径
+        function generatePath() {
+            // 清除现有路径
+            gameData.path.forEach(cell => {
+                gameData.grid[cell.y][cell.x].isPath = false;
+                gameData.grid[cell.y][cell.x].element.classList.remove('path');
+            });
+            gameData.path = [];
+            
+            // 随机选择起点和终点
+            let startSide = Math.floor(Math.random() * 4); // 0:上, 1:右, 2:下, 3:左
+            let endSide = (startSide + 2 + Math.floor(Math.random() * 2)) % 4; // 对面的两边
+            
+            let startX, startY, endX, endY;
+            
+            // 设置起点
+            switch (startSide) {
+                case 0: // 上
+                    startX = Math.floor(Math.random() * Config.GRID_SIZE);
+                    startY = 0;
+                    break;
+                case 1: // 右
+                    startX = Config.GRID_SIZE - 1;
+                    startY = Math.floor(Math.random() * Config.GRID_SIZE);
+                    break;
+                case 2: // 下
+                    startX = Math.floor(Math.random() * Config.GRID_SIZE);
+                    startY = Config.GRID_SIZE - 1;
+                    break;
+                case 3: // 左
+                    startX = 0;
+                    startY = Math.floor(Math.random() * Config.GRID_SIZE);
+                    break;
+            }
+            
+            // 设置终点
+            switch (endSide) {
+                case 0: // 上
+                    endX = Math.floor(Math.random() * Config.GRID_SIZE);
+                    endY = 0;
+                    break;
+                case 1: // 右
+                    endX = Config.GRID_SIZE - 1;
+                    endY = Math.floor(Math.random() * Config.GRID_SIZE);
+                    break;
+                case 2: // 下
+                    endX = Math.floor(Math.random() * Config.GRID_SIZE);
+                    endY = Config.GRID_SIZE - 1;
+                    break;
+                case 3: // 左
+                    endX = 0;
+                    endY = Math.floor(Math.random() * Config.GRID_SIZE);
+                    break;
+            }
+            
+            // 生成路径 (使用A*算法)
+            gameData.path = findPath(startX, startY, endX, endY);
+            
+            // 标记路径和基地
+            gameData.path.forEach((cell, index) => {
+                gameData.grid[cell.y][cell.x].isPath = true;
+                gameData.grid[cell.y][cell.x].element.classList.add('path');
+                
+                // 最后一个格子是基地
+                if (index === gameData.path.length - 1) {
+                    gameData.grid[cell.y][cell.x].isBase = true;
+                    gameData.grid[cell.y][cell.x].element.classList.add('base');
+                    gameData.grid[cell.y][cell.x].element.innerHTML = '基';
+                    
+                    // 添加基地血条
+                    const healthBar = document.createElement('div');
+                    healthBar.className = 'base-health';
+                    healthBar.style.width = '100%';
+                    gameData.grid[cell.y][cell.x].element.appendChild(healthBar);
+                }
+            });
+        }
+        
+        // A*寻路算法
+        function findPath(startX, startY, endX, endY) {
+            const openSet = [];
+            const closedSet = new Set();
+            const cameFrom = {};
+            const gScore = {};
+            const fScore = {};
+            
+            // 初始化
+            const startKey = `${startX},${startY}`;
+            const endKey = `${endX},${endY}`;
+            
+            gScore[startKey] = 0;
+            fScore[startKey] = heuristic(startX, startY, endX, endY);
+            openSet.push({ x: startX, y: startY, key: startKey, f: fScore[startKey] });
+            
+            while (openSet.length > 0) {
+                // 按f值排序
+                openSet.sort((a, b) => a.f - b.f);
+                const current = openSet.shift();
+                
+                // 找到目标
+                if (current.key === endKey) {
+                    return reconstructPath(cameFrom, current.x, current.y);
+                }
+                
+                closedSet.add(current.key);
+                
+                // 检查邻居
+                const neighbors = getNeighbors(current.x, current.y);
+                for (const neighbor of neighbors) {
+                    const neighborKey = `${neighbor.x},${neighbor.y}`;
+                    
+                    if (closedSet.has(neighborKey)) {
+                        continue;
+                    }
+                    
+                    // 计算临时g值
+                    const tentativeGScore = gScore[current.key] + 1;
+                    
+                    // 检查是否在openSet中
+                    const inOpenSet = openSet.find(n => n.key === neighborKey);
+                    
+                    if (!inOpenSet || tentativeGScore < gScore[neighborKey]) {
+                        cameFrom[neighborKey] = { x: current.x, y: current.y };
+                        gScore[neighborKey] = tentativeGScore;
+                        fScore[neighborKey] = gScore[neighborKey] + heuristic(neighbor.x, neighbor.y, endX, endY);
+                        
+                        if (!inOpenSet) {
+                            openSet.push({ x: neighbor.x, y: neighbor.y, key: neighborKey, f: fScore[neighborKey] });
+                        } else {
+                            inOpenSet.f = fScore[neighborKey];
+                        }
+                    }
+                }
+            }
+            
+            // 没有找到路径，返回直线路径
+            return simplePath(startX, startY, endX, endY);
+        }
+        
+        // 启发式函数 (曼哈顿距离)
+        function heuristic(x1, y1, x2, y2) {
+            return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+        }
+        
+        // 获取邻居格子
+        function getNeighbors(x, y) {
+            const neighbors = [];
+            
+            if (x > 0) neighbors.push({ x: x - 1, y });
+            if (x < Config.GRID_SIZE - 1) neighbors.push({ x: x + 1, y });
+            if (y > 0) neighbors.push({ x, y: y - 1 });
+            if (y < Config.GRID_SIZE - 1) neighbors.push({ x, y: y + 1 });
+            
+            return neighbors;
+        }
+        
+        // 重建路径
+        function reconstructPath(cameFrom, x, y) {
+            const path = [{ x, y }];
+            let currentKey = `${x},${y}`;
+            
+            while (cameFrom[currentKey]) {
+                const { x: px, y: py } = cameFrom[currentKey];
+                path.unshift({ x: px, y: py });
+                currentKey = `${px},${py}`;
+            }
+            
+            return path;
+        }
+        
+        // 简单路径 (直线)
+        function simplePath(startX, startY, endX, endY) {
+            const path = [];
+            let x = startX;
+            let y = startY;
+            
+            path.push({ x, y });
+            
+            while (x !== endX || y !== endY) {
+                if (x < endX) x++;
+                else if (x > endX) x--;
+                
+                if (y < endY) y++;
+                else if (y > endY) y--;
+                
+                path.push({ x, y });
+            }
+            
+            return path;
+        }
+        
+        // 开始波次
+        function startWave() {
+            if (gameData.state !== GameState.READY) return;
+            
+            gameData.state = GameState.WAVE_IN_PROGRESS;
+            gameData.wave++;
+            updateUI();
+            
+            // 生成敌人
+            const enemyCount = Math.floor(gameData.level * 1.5) + gameData.wave * 2;
+            const enemyTypes = Math.min(Math.floor(gameData.level / 10) + 1, Config.ENEMY_TYPES.length);
+            
+            let spawned = 0;
+            const spawnInterval = setInterval(() => {
+                if (spawned >= enemyCount) {
+                    clearInterval(spawnInterval);
+                    return;
+                }
+                
+                spawnEnemy(enemyTypes);
+                spawned++;
+            }, Config.ENEMY_SPAWN_DELAY);
+        }
+        
+        // 生成敌人
+        function spawnEnemy(enemyTypes) {
+            const pathStart = gameData.path[0];
+            const enemyType = Math.floor(Math.random() * enemyTypes);
+            const enemyHealth = Math.floor(gameData.level * 10 + gameData.wave * 5);
+            const enemySpeed = 0.5 + Math.random() * 0.5;
+            const enemyReward = Math.floor(enemyHealth / 10) + 1;
+            
+            const enemy = {
+                type: enemyType,
+                x: pathStart.x,
+                y: pathStart.y,
+                health: enemyHealth,
+                maxHealth: enemyHealth,
+                speed: enemySpeed,
+                reward: enemyReward,
+                pathIndex: 0,
+                statusEffects: [],
+                element: document.createElement('div')
+            };
+            
+            enemy.element.className = 'enemy';
+            enemy.element.textContent = Config.ENEMY_TYPES[enemyType];
+            enemy.element.style.color = Config.ENEMY_COLORS[enemyType];
+            
+            // 定位
+            updateEnemyPosition(enemy);
+            
+            elements.gridContainer.appendChild(enemy.element);
+            gameData.enemies.push(enemy);
+        }
+        
+        // 更新敌人位置
+        function updateEnemyPosition(enemy) {
+            const cellSize = elements.gridContainer.clientWidth / Config.GRID_SIZE;
+            const cell = gameData.grid[enemy.y][enemy.x].element;
+            const rect = cell.getBoundingClientRect();
+            const containerRect = elements.gridContainer.getBoundingClientRect();
+            
+            enemy.element.style.left = `${rect.left - containerRect.left}px`;
+            enemy.element.style.top = `${rect.top - containerRect.top}px`;
+            enemy.element.style.width = `${cellSize}px`;
+            enemy.element.style.height = `${cellSize}px`;
+        }
+        
+        // 放置塔
+        function placeTower(x, y, type) {
+            // 检查是否可以放置
+            if (gameData.grid[y][x].isPath || gameData.grid[y][x].isBase) {
+                return false;
+            }
+            
+            // 检查是否已有塔
+            if (gameData.towers.some(t => t.x === x && t.y === y)) {
+                return false;
+            }
+            
+            // 检查金币是否足够
+            const cost = Config.TOWER_BASE_COST * (1 + gameData.upgrades[type] * 0.2);
+            if (gameData.gold < cost) {
+                alert('金币不足!');
+                return false;
+            }
+            
+            // 扣除金币
+            gameData.gold -= cost;
+            
+            // 创建塔
+            const tower = {
+                type,
+                x,
+                y,
+                level: 1 + gameData.upgrades[type],
+                damage: 10 + gameData.upgrades[type] * 5,
+                range: 2 + Math.floor(gameData.upgrades[type] / 2),
+                speed: 1000 - gameData.upgrades[type] * 50,
+                lastShot: 0,
+                element: document.createElement('div')
+            };
+            
+            // 随机状态效果
+            if (Math.random() < 0.3) {
+                const effectIndex = Math.floor(Math.random() * Config.STATUS_EFFECTS.length);
+                tower.effect = Config.STATUS_EFFECTS[effectIndex];
+                tower.effectChance = 0.2 + gameData.upgrades[type] * 0.05;
+            } else {
+                tower.effect = null;
+                tower.effectChance = 0;
+            }
+            
+            tower.element.className = 'tower';
+            tower.element.textContent = type;
+            tower.element.style.backgroundColor = Config.TOWER_COLORS[Config.TOWER_TYPES.indexOf(type)];
+            
+            // 定位
+            const cellSize = elements.gridContainer.clientWidth / Config.GRID_SIZE;
+            const cell = gameData.grid[y][x].element;
+            const rect = cell.getBoundingClientRect();
+            const containerRect = elements.gridContainer.getBoundingClientRect();
+            
+            tower.element.style.left = `${rect.left - containerRect.left}px`;
+            tower.element.style.top = `${rect.top - containerRect.top}px`;
+            tower.element.style.width = `${cellSize}px`;
+            tower.element.style.height = `${cellSize}px`;
+            
+            elements.gridContainer.appendChild(tower.element);
+            gameData.towers.push(tower);
+            
+            // 更新统计
+            gameData.stats.towersBuilt++;
+            gameData.stats.towersByType[type]++;
+            
+            // 检查成就
+            checkTowerMasterAchievement();
+            
+            updateUI();
+            return true;
+        }
+        
+        // 显示塔信息
+        function showTowerInfo(tower) {
+            elements.towerName.textContent = `${tower.type}塔`;
+            elements.towerLevel.textContent = tower.level;
+            elements.towerDamage.textContent = tower.damage;
+            elements.towerRange.textContent = tower.range;
+            elements.towerSpeed.textContent = `${(1000 / tower.speed).toFixed(1)}次/秒`;
+            elements.towerEffect.textContent = tower.effect || '无';
+            
+            // 升级成本
+            const upgradeCost = Math.floor(tower.level * 20 * (1 + gameData.upgrades[tower.type] * 0.1));
+            elements.upgradeCost.textContent = upgradeCost;
+            
+            // 出售价值
+            const sellValue = Math.floor(Config.TOWER_BASE_COST * (1 + gameData.upgrades[tower.type] * 0.2) * Config.SELL_RATIO * (1 + (tower.level - 1) * 0.2));
+            elements.sellValue.textContent = sellValue;
+            
+            // 存储当前塔引用
+            elements.towerInfo.dataset.towerIndex = gameData.towers.indexOf(tower);
+            
+            // 显示面板
+            elements.towerInfo.style.display = 'block';
+        }
+        
+        // 升级塔
+        function upgradeTower(towerIndex) {
+            const tower = gameData.towers[towerIndex];
+            const upgradeCost = Math.floor(tower.level * 20 * (1 + gameData.upgrades[tower.type] * 0.1));
+            
+            if (gameData.gold < upgradeCost) {
+                alert('金币不足!');
+                return;
+            }
+            
+            gameData.gold -= upgradeCost;
+            tower.level++;
+            tower.damage += 5 + Math.floor(tower.level / 2);
+            
+            // 每3级增加范围
+            if (tower.level % 3 === 0) {
+                tower.range++;
+            }
+            
+            // 提高攻速
+            tower.speed = Math.max(200, tower.speed - 30);
+            
+            // 提高状态效果几率
+            if (tower.effect) {
+                tower.effectChance = Math.min(0.8, tower.effectChance + 0.05);
+            }
+            
+            // 检查成就
+            if (tower.level >= 10) {
+                unlockAchievement('tower_specialist');
+            }
+            
+            updateUI();
+            showTowerInfo(tower);
+        }
+        
+        // 出售塔
+        function sellTower(towerIndex) {
+            const tower = gameData.towers[towerIndex];
+            const sellValue = Math.floor(Config.TOWER_BASE_COST * (1 + gameData.upgrades[tower.type] * 0.2) * Config.SELL_RATIO * (1 + (tower.level - 1) * 0.2));
+            
+            // 移除塔元素
+            tower.element.remove();
+            
+            // 增加金币
+            gameData.gold += sellValue;
+            
+            // 从数组中移除
+            gameData.towers.splice(towerIndex, 1);
+            
+            updateUI();
+            elements.towerInfo.style.display = 'none';
+        }
+        
+        // 显示塔选择菜单
+        function showTowerSelect(x, y) {
+            elements.towerSelect.innerHTML = '';
+            
+            Config.TOWER_TYPES.forEach(type => {
+                const cost = Config.TOWER_BASE_COST * (1 + gameData.upgrades[type] * 0.2);
+                const button = document.createElement('button');
+                button.className = 'tower-option';
+                button.textContent = `${type}塔 (💰${cost})`;
+                button.style.backgroundColor = Config.TOWER_COLORS[Config.TOWER_TYPES.indexOf(type)];
+                
+                button.addEventListener('click', () => {
+                    if (placeTower(x, y, type)) {
+                        elements.towerSelect.style.display = 'none';
+                    }
+                });
+                
+                elements.towerSelect.appendChild(button);
+            });
+            
+            // 取消按钮
+            const cancelButton = document.createElement('button');
+            cancelButton.className = 'tower-option btn-danger';
+            cancelButton.textContent = '取消';
+            cancelButton.addEventListener('click', () => {
+                elements.towerSelect.style.display = 'none';
+            });
+            elements.towerSelect.appendChild(cancelButton);
+            
+            // 定位
+            const cellSize = elements.gridContainer.clientWidth / Config.GRID_SIZE;
+            const cell = gameData.grid[y][x].element;
+            const rect = cell.getBoundingClientRect();
+            const containerRect = elements.gridContainer.getBoundingClientRect();
+            
+            elements.towerSelect.style.left = `${rect.left - containerRect.left}px`;
+            elements.towerSelect.style.top = `${rect.top - containerRect.top - elements.towerSelect.clientHeight - 5}px`;
+            elements.towerSelect.style.display = 'flex';
+        }
+        
+        // 游戏主循环
+        function gameLoop(timestamp) {
+            // 更新敌人
+            updateEnemies(timestamp);
+            
+            // 更新塔
+            updateTowers(timestamp);
+            
+            // 更新投射物
+            updateProjectiles();
+            
+            // 更新状态效果
+            updateStatusEffects(timestamp);
+            
+            // 检查游戏状态
+            checkGameState();
+            
+            // 继续循环
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // 更新敌人
+        function updateEnemies(timestamp) {
+            gameData.enemies.forEach((enemy, index) => {
+                // 更新状态效果
+                updateEnemyStatusEffects(enemy, timestamp);
+                
+                // 如果被眩晕，跳过移动
+                if (enemy.statusEffects.some(e => e.type === '眩晕' && e.endTime > timestamp)) {
+                    return;
+                }
+                
+                // 计算移动速度 (考虑减速效果)
+                let speed = enemy.speed;
+                const slowEffect = enemy.statusEffects.find(e => e.type === '减速' && e.endTime > timestamp);
+                if (slowEffect) {
+                    speed *= 0.5;
+                }
+                
+                // 移动敌人
+                const pathIndex = Math.floor((timestamp / 1000) * speed) % (gameData.path.length - 1);
+                
+                if (pathIndex > enemy.pathIndex) {
+                    enemy.pathIndex = pathIndex;
+                    const nextCell = gameData.path[enemy.pathIndex];
+                    enemy.x = nextCell.x;
+                    enemy.y = nextCell.y;
+                    updateEnemyPosition(enemy);
+                    
+                    // 检查是否到达基地
+                    if (enemy.pathIndex === gameData.path.length - 1) {
+                        // 基地受到伤害
+                        gameData.baseHealth -= Math.floor(enemy.maxHealth / 10);
+                        gameData.perfectLevel = false;
+                        
+                        // 更新基地血条
+                        const baseCell = gameData.path[gameData.path.length - 1];
+                        const healthBar = gameData.grid[baseCell.y][baseCell.x].element.querySelector('.base-health');
+                        if (healthBar) {
+                            const healthPercent = (gameData.baseHealth / gameData.maxBaseHealth) * 100;
+                            healthBar.style.width = `${healthPercent}%`;
+                        }
+                        
+                        // 移除敌人
+                        enemy.element.remove();
+                        gameData.enemies.splice(index, 1);
+                        
+                        // 检查游戏结束
+                        if (gameData.baseHealth <= 0) {
+                            gameData.state = GameState.GAME_OVER;
+                            elements.finalWave.textContent = gameData.wave;
+                            elements.gameOver.style.display = 'flex';
+                            
+                            // 保存游戏数据
+                            saveGameData();
+                        }
+                        
+                        return;
+                    }
+                }
+            });
+        }
+        
+        // 更新敌人状态效果
+        function updateEnemyStatusEffects(enemy, timestamp) {
+            // 处理燃烧效果
+            const burnEffect = enemy.statusEffects.find(e => e.type === '燃烧' && e.endTime > timestamp);
+            if (burnEffect) {
+                if (timestamp - burnEffect.lastDamageTime >= 500) {
+                    enemy.health -= burnEffect.damage;
+                    burnEffect.lastDamageTime = timestamp;
+                    
+                    // 显示伤害数字
+                    showDamage(enemy.x, enemy.y, burnEffect.damage, '#f44336');
+                    
+                    // 检查敌人是否死亡
+                    if (enemy.health <= 0) {
+                        enemyKilled(enemy);
+                    }
+                }
+            }
+            
+            // 处理中毒效果
+            const poisonEffect = enemy.statusEffects.find(e => e.type === '中毒' && e.endTime > timestamp);
+            if (poisonEffect) {
+                if (timestamp - poisonEffect.lastDamageTime >= 1000) {
+                    enemy.health -= poisonEffect.damage;
+                    poisonEffect.lastDamageTime = timestamp;
+                    
+                    // 显示伤害数字
+                    showDamage(enemy.x, enemy.y, poisonEffect.damage, '#4CAF50');
+                    
+                    // 检查敌人是否死亡
+                    if (enemy.health <= 0) {
+                        enemyKilled(enemy);
+                    }
+                }
+            }
+            
+            // 移除已结束的状态效果
+            enemy.statusEffects = enemy.statusEffects.filter(e => e.endTime > timestamp);
+        }
+        
+        // 更新塔
+        function updateTowers(timestamp) {
+            gameData.towers.forEach(tower => {
+                // 检查冷却时间
+                if (timestamp - tower.lastShot < tower.speed) {
+                    return;
+                }
+                
+                // 寻找范围内的敌人
+                const target = findTarget(tower);
+                if (target) {
+                    // 攻击敌人
+                    attackEnemy(tower, target, timestamp);
+                    tower.lastShot = timestamp;
+                }
+            });
+        }
+        
+        // 寻找目标
+        function findTarget(tower) {
+            let closestEnemy = null;
+            let closestDistance = Infinity;
+            
+            gameData.enemies.forEach(enemy => {
+                const distance = Math.sqrt(Math.pow(enemy.x - tower.x, 2) + Math.pow(enemy.y - tower.y, 2));
+                
+                if (distance <= tower.range && distance < closestDistance) {
+                    closestDistance = distance;
+                    closestEnemy = enemy;
+                }
+            });
+            
+            return closestEnemy;
+        }
+        
+        // 攻击敌人
+        function attackEnemy(tower, enemy, timestamp) {
+            // 创建投射物
+            const projectile = {
+                x: tower.x,
+                y: tower.y,
+                targetX: enemy.x,
+                targetY: enemy.y,
+                damage: tower.damage,
+                effect: tower.effect,
+                effectChance: tower.effectChance,
+                element: document.createElement('div')
+            };
+            
+            projectile.element.className = 'projectile';
+            
+            // 定位
+            const cellSize = elements.gridContainer.clientWidth / Config.GRID_SIZE;
+            const cell = gameData.grid[tower.y][tower.x].element;
+            const rect = cell.getBoundingClientRect();
+            const containerRect = elements.gridContainer.getBoundingClientRect();
+            
+            projectile.element.style.left = `${rect.left - containerRect.left + cellSize / 2 - 2}px`;
+            projectile.element.style.top = `${rect.top - containerRect.top + cellSize / 2 - 2}px`;
+            
+            elements.gridContainer.appendChild(projectile.element);
+            gameData.projectiles.push(projectile);
+        }
+        
+        // 更新投射物
+        function updateProjectiles() {
+            gameData.projectiles.forEach((projectile, index) => {
+                // 计算当前位置到目标位置的比例
+                const progress = Math.min(1, (Date.now() - projectile.startTime) / (Config.PROJECTILE_SPEED * 100));
+                
+                // 计算当前位置
+                const currentX = projectile.x + (projectile.targetX - projectile.x) * progress;
+                const currentY = projectile.y + (projectile.targetY - projectile.y) * progress;
+                
+                // 更新位置
+                const cellSize = elements.gridContainer.clientWidth / Config.GRID_SIZE;
+                const containerRect = elements.gridContainer.getBoundingClientRect();
+                
+                projectile.element.style.left = `${currentX * cellSize + containerRect.left - containerRect.left + cellSize / 2 - 2}px`;
+                projectile.element.style.top = `${currentY * cellSize + containerRect.top - containerRect.top + cellSize / 2 - 2}px`;
+                
+                // 检查是否到达目标
+                if (progress >= 1) {
+                    // 查找目标敌人
+                    const targetEnemy = gameData.enemies.find(enemy => 
+                        enemy.x === projectile.targetX && enemy.y === projectile.targetY
+                    );
+                    
+                    if (targetEnemy) {
+                        // 造成伤害
+                        targetEnemy.health -= projectile.damage;
+                        
+                        // 显示伤害数字
+                        showDamage(targetEnemy.x, targetEnemy.y, projectile.damage, '#ffeb3b');
+                        
+                        // 检查敌人是否死亡
+                        if (targetEnemy.health <= 0) {
+                            enemyKilled(targetEnemy);
+                        } else {
+                            // 应用状态效果
+                            if (projectile.effect && Math.random() < projectile.effectChance) {
+                                applyStatusEffect(targetEnemy, projectile.effect);
+                            }
+                        }
+                    }
+                    
+                    // 移除投射物
+                    projectile.element.remove();
+                    gameData.projectiles.splice(index, 1);
+                }
+            });
+        }
+        
+        // 应用状态效果
+        function applyStatusEffect(enemy, effectType) {
+            // 检查是否已有相同效果
+            const existingEffect = enemy.statusEffects.find(e => e.type === effectType);
+            
+            if (existingEffect) {
+                // 刷新持续时间
+                existingEffect.endTime = Date.now() + Config.STATUS_DURATION;
+            } else {
+                // 创建新效果
+                const newEffect = {
+                    type: effectType,
+                    endTime: Date.now() + Config.STATUS_DURATION
+                };
+                
+                // 设置效果特定属性
+                switch (effectType) {
+                    case '燃烧':
+                        newEffect.damage = Math.floor(enemy.maxHealth * 0.02);
+                        newEffect.lastDamageTime = 0;
+                        gameData.stats.statusApplied.burn++;
+                        break;
+                    case '冰冻':
+                        // 冰冻会覆盖眩晕
+                        enemy.statusEffects = enemy.statusEffects.filter(e => e.type !== '眩晕');
+                        gameData.stats.statusApplied.freeze++;
+                        break;
+                    case '中毒':
+                        newEffect.damage = Math.floor(enemy.maxHealth * 0.01);
+                        newEffect.lastDamageTime = 0;
+                        gameData.stats.statusApplied.poison++;
+                        break;
+                    case '眩晕':
+                        // 眩晕会覆盖冰冻
+                        enemy.statusEffects = enemy.statusEffects.filter(e => e.type !== '冰冻');
+                        gameData.stats.statusApplied.stun++;
+                        break;
+                    case '减速':
+                        gameData.stats.statusApplied.slow++;
+                        break;
+                }
+                
+                enemy.statusEffects.push(newEffect);
+                
+                // 显示状态效果
+                showStatusEffect(enemy, effectType);
+                
+                // 检查成就
+                checkStatusMasterAchievement();
+            }
+        }
+        
+        // 显示状态效果
+        function showStatusEffect(enemy, effectType) {
+            const effectElement = document.createElement('div');
+            effectElement.className = 'status-effect';
+            effectElement.textContent = effectType;
+            effectElement.style.color = Config.STATUS_COLORS[Config.STATUS_EFFECTS.indexOf(effectType)];
+            
+            // 定位
+            const cellSize = elements.gridContainer.clientWidth / Config.GRID_SIZE;
+            const containerRect = elements.gridContainer.getBoundingClientRect();
+            
+            effectElement.style.left = `${enemy.x * cellSize + containerRect.left - containerRect.left}px`;
+            effectElement.style.top = `${enemy.y * cellSize + containerRect.top - containerRect.top - 20}px`;
+            
+            elements.gridContainer.appendChild(effectElement);
+            
+            // 设置消失动画
+            setTimeout(() => {
+                effectElement.style.opacity = '0';
+                effectElement.style.transition = 'opacity 0.5s';
+                
+                setTimeout(() => {
+                    effectElement.remove();
+                }, 500);
+            }, Config.STATUS_DURATION - 500);
+        }
+        
+        // 更新状态效果
+        function updateStatusEffects(timestamp) {
+            // 状态效果由敌人自己更新
+        }
+        
+        // 敌人被击杀
+        function enemyKilled(enemy) {
+            // 奖励金币
+            gameData.gold += enemy.reward;
+            gameData.totalGold += enemy.reward;
+            
+            // 随机奖励水晶
+            if (Math.random() < 0.1) {
+                gameData.crystal++;
+                gameData.totalCrystal++;
+            }
+            
+            // 更新统计
+            gameData.stats.enemiesKilled++;
+            
+            // 检查成就
+            if (gameData.stats.enemiesKilled === 1) {
+                unlockAchievement('first_blood');
+            }
+            
+            // 移除敌人
+            enemy.element.remove();
+            gameData.enemies = gameData.enemies.filter(e => e !== enemy);
+            
+            // 显示击杀效果
+            showDamage(enemy.x, enemy.y, '击杀!', '#ff5252');
+        }
+        
+        // 显示伤害数字
+        function showDamage(x, y, damage, color) {
+            const damageElement = document.createElement('div');
+            damageElement.className = 'status-effect';
+            damageElement.textContent = damage;
+            damageElement.style.color = color;
+            damageElement.style.fontWeight = 'bold';
+            
+            // 定位
+            const cellSize = elements.gridContainer.clientWidth / Config.GRID_SIZE;
+            const containerRect = elements.gridContainer.getBoundingClientRect();
+            
+            damageElement.style.left = `${x * cellSize + containerRect.left - containerRect.left + cellSize / 2 - 10}px`;
+            damageElement.style.top = `${y * cellSize + containerRect.top - containerRect.top - 10}px`;
+            
+            elements.gridContainer.appendChild(damageElement);
+            
+            // 动画
+            let pos = -10;
+            const animate = () => {
+                pos -= 1;
+                damageElement.style.top = `${y * cellSize + containerRect.top - containerRect.top + pos}px`;
+                
+                if (pos > -30) {
+                    requestAnimationFrame(animate);
+                } else {
+                    damageElement.remove();
+                }
+            };
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // 检查游戏状态
+        function checkGameState() {
+            // 检查波次是否完成
+            if (gameData.state === GameState.WAVE_IN_PROGRESS && 
+                gameData.enemies.length === 0 && 
+                gameData.projectiles.length === 0) {
+                
+                // 检查是否所有波次完成
+                if (gameData.wave >= gameData.maxWave) {
+                    // 关卡完成
+                    levelComplete();
+                } else {
+                    // 准备下一波
+                    gameData.state = GameState.READY;
+                    updateUI();
+                }
+            }
+        }
+        
+        // 关卡完成
+        function levelComplete() {
+            gameData.state = GameState.LEVEL_COMPLETE;
+            
+            // 计算奖励
+            const goldReward = Config.GOLD_PER_LEVEL * gameData.level;
+            const crystalReward = Config.CRYSTAL_PER_LEVEL + Math.floor(gameData.level / 10);
+            
+            // 完美关卡额外奖励
+            if (gameData.perfectLevel) {
+                gameData.stats.perfectLevels++;
+                goldReward *= 2;
+                crystalReward *= 2;
+            }
+            
+            // 计算通关时间
+            const levelTime = (Date.now() - gameData.startTime) / 1000;
+            if (levelTime < gameData.stats.fastestLevel) {
+                gameData.stats.fastestLevel = levelTime;
+            }
+            
+            // 速通成就检查
+            if (levelTime <= 10) {
+                unlockAchievement('speed_runner');
+            }
+            
+            // 更新总游戏时间
+            gameData.stats.totalPlayTime += levelTime;
+            
+            // 给予奖励
+            gameData.gold += goldReward;
+            gameData.totalGold += goldReward;
+            gameData.crystal += crystalReward;
+            gameData.totalCrystal += crystalReward;
+            
+            // 更新显示
+            elements.rewardGold.textContent = goldReward;
+            elements.rewardCrystal.textContent = crystalReward;
+            elements.levelComplete.style.display = 'flex';
+            
+            // 检查成就
+            if (gameData.level >= 10) {
+                unlockAchievement('level_10');
+            }
+            if (gameData.level >= 100) {
+                unlockAchievement('level_100');
+            }
+            if (gameData.totalGold >= 10000) {
+                unlockAchievement('millionaire');
+            }
+            if (gameData.totalCrystal >= 500) {
+                unlockAchievement('crystal_king');
+            }
+            if (gameData.stats.perfectLevels >= 10) {
+                unlockAchievement('perfect_10');
+            }
+            
+            // 保存游戏数据
+            saveGameData();
+        }
+        
+        // 下一关
+        function nextLevel() {
+            gameData.level++;
+            if (gameData.level > 9999) {
+                gameData.level = 9999;
+                alert('恭喜你通关了所有9999关!你是真正的塔防大师!');
+            }
+            
+            // 恢复基地生命值
+            gameData.baseHealth = gameData.maxBaseHealth;
+            
+            // 生成新关卡
+            generateLevel();
+            
+            // 隐藏完成面板
+            elements.levelComplete.style.display = 'none';
+        }
+        
+        // 更新UI
+        function updateUI() {
+            // 资源显示
+            elements.goldDisplay.textContent = gameData.gold;
+            elements.crystalDisplay.textContent = gameData.crystal;
+            elements.levelDisplay.textContent = gameData.level;
+            
+            // 波次信息
+            elements.waveInfo.textContent = `波次: ${gameData.wave}/${gameData.maxWave}`;
+            
+            // 开始波次按钮
+            if (gameData.state === GameState.READY) {
+                elements.startWaveBtn.textContent = '开始波次';
+                elements.startWaveBtn.className = 'btn btn-primary';
+            } else if (gameData.state === GameState.WAVE_IN_PROGRESS) {
+                elements.startWaveBtn.textContent = '波次进行中...';
+                elements.startWaveBtn.className = 'btn';
+            }
+        }
+        
+        // 显示商店
+        function showShop() {
+            elements.modalTitle.textContent = '商店';
+            elements.modalContent.innerHTML = '';
+            
+            // 塔升级
+            const towerUpgrades = document.createElement('div');
+            towerUpgrades.innerHTML = '<h3>塔升级</h3><p>提高对应类型塔的初始等级</p>';
+            
+            Config.TOWER_TYPES.forEach(type => {
+                const upgradeItem = document.createElement('div');
+                upgradeItem.className = 'shop-item';
+                
+                const currentLevel = gameData.upgrades[type];
+                const cost = 50 + currentLevel * 50;
+                
+                upgradeItem.innerHTML = `
+                    <h4>${type}塔升级</h4>
+                    <p>当前等级: ${currentLevel}</p>
+                    <p>效果: 初始等级 ${currentLevel + 1}, 伤害 +${5 + currentLevel * 2}, 范围 +${Math.floor((currentLevel + 1) / 2)}</p>
+                    <div class="resource gold">
+                        <span class="resource-icon">💰</span>
+                        <span>${cost}</span>
+                    </div>
+                `;
+                
+                upgradeItem.addEventListener('click', () => {
+                    if (gameData.gold >= cost) {
+                        gameData.gold -= cost;
+                        gameData.upgrades[type]++;
+                        showShop();
+                        updateUI();
+                    } else {
+                        alert('金币不足!');
+                    }
+                });
+                
+                towerUpgrades.appendChild(upgradeItem);
+            });
+            
+            elements.modalContent.appendChild(towerUpgrades);
+            
+            // 基地升级
+            const baseUpgrades = document.createElement('div');
+            baseUpgrades.innerHTML = '<h3 style="margin-top: 20px;">基地升级</h3>';
+            
+            const healthUpgrade = document.createElement('div');
+            healthUpgrade.className = 'shop-item';
+            
+            const healthCost = 100 + Math.floor(gameData.maxBaseHealth / 10) * 50;
+            
+            healthUpgrade.innerHTML = `
+                <h4>基地生命值</h4>
+                <p>当前: ${gameData.maxBaseHealth}</p>
+                <p>升级后: ${gameData.maxBaseHealth + 10}</p>
+                <div class="resource gold">
+                    <span class="resource-icon">💰</span>
+                    <span>${healthCost}</span>
+                </div>
+            `;
+            
+            healthUpgrade.addEventListener('click', () => {
+                if (gameData.gold >= healthCost) {
+                    gameData.gold -= healthCost;
+                    gameData.maxBaseHealth += 10;
+                    gameData.baseHealth += 10;
+                    showShop();
+                    updateUI();
+                    
+                    // 更新基地血条
+                    const baseCell = gameData.path[gameData.path.length - 1];
+                    const healthBar = gameData.grid[baseCell.y][baseCell.x].element.querySelector('.base-health');
+                    if (healthBar) {
+                        const healthPercent = (gameData.baseHealth / gameData.maxBaseHealth) * 100;
+                        healthBar.style.width = `${healthPercent}%`;
+                    }
+                } else {
+                    alert('金币不足!');
+                }
+            });
+            
+            baseUpgrades.appendChild(healthUpgrade);
+            elements.modalContent.appendChild(baseUpgrades);
+            
+            // 特殊物品
+            const specialItems = document.createElement('div');
+            specialItems.innerHTML = '<h3 style="margin-top: 20px;">特殊物品</h3>';
+            
+            const crystalConverter = document.createElement('div');
+            crystalConverter.className = 'shop-item';
+            
+            crystalConverter.innerHTML = `
+                <h4>金币转换器</h4>
+                <p>将水晶转换为金币</p>
+                <p>兑换比例: 1水晶 = 100金币</p>
+                <div class="resource crystal">
+                    <span class="resource-icon">💎</span>
+                    <span>1</span>
+                </div>
+            `;
+            
+            crystalConverter.addEventListener('click', () => {
+                if (gameData.crystal >= 1) {
+                    gameData.crystal -= 1;
+                    gameData.gold += 100;
+                    showShop();
+                    updateUI();
+                } else {
+                    alert('水晶不足!');
+                }
+            });
+            
+            specialItems.appendChild(crystalConverter);
+            elements.modalContent.appendChild(specialItems);
+            
+            // 显示模态框
+            elements.modalOverlay.style.display = 'flex';
+        }
+        
+        // 显示教程
+        function showTutorial(page = 1) {
+            const tutorialPages = [
+                {
+                    title: "欢迎来到汉字塔防",
+                    content: "这是一款独特的塔防游戏，使用汉字作为塔和敌人。你的目标是保护基地不被敌人摧毁。"
+                },
+                {
+                    title: "游戏基础",
+                    content: "1. 点击空地建造防御塔<br>2. 点击'开始波次'按钮让敌人出现<br>3. 敌人会沿着路径向你的基地移动<br>4. 阻止敌人到达基地"
+                },
+                {
+                    title: "塔的类型",
+                    content: "游戏中有5种塔:<br>- 火塔: 高伤害，可能造成燃烧效果<br>- 水塔: 中等伤害，可能造成冰冻效果<br>- 风塔: 快速攻击，可能造成眩晕效果<br>- 土塔: 高生命值，可能造成中毒效果<br>- 雷塔: 范围攻击，可能造成减速效果"
+                },
+                {
+                    title: "资源系统",
+                    content: "金币: 用于建造和升级塔<br>水晶: 稀有资源，用于特殊升级<br><br>击败敌人可以获得金币，偶尔也能获得水晶。"
+                },
+                {
+                    title: "进阶技巧",
+                    content: "1. 不同类型塔的组合更有效<br>2. 优先升级常用塔<br>3. 利用状态效果控制敌人<br>4. 完美通关(基地不受损)可获得双倍奖励"
+                }
+            ];
+            
+            if (page < 1) page = 1;
+            if (page > tutorialPages.length) {
+                elements.tutorialPanel.style.display = 'none';
+                return;
+            }
+            
+            const currentPage = tutorialPages[page - 1];
+            elements.tutorialContent.innerHTML = `<h3>${currentPage.title}</h3><p>${currentPage.content}</p>`;
+            elements.tutorialPage.textContent = `${page}/${tutorialPages.length}`;
+            elements.tutorialPanel.style.display = 'block';
+            
+            // 更新按钮状态
+            elements.tutorialPrev.disabled = page <= 1;
+            elements.tutorialNext.disabled = page >= tutorialPages.length;
+        }
+        
+        // 显示成就
+        function showAchievements() {
+            elements.achievementsList.innerHTML = '';
+            
+            gameData.achievements.forEach(achievement => {
+                const achievementElement = document.createElement('div');
+                achievementElement.className = `achievement ${achievement.unlocked ? '' : 'achievement-locked'}`;
+                
+                achievementElement.innerHTML = `
+                    <div class="achievement-icon">${achievement.unlocked ? '🏆' : '🔒'}</div>
+                    <div class="achievement-info">
+                        <div class="achievement-name">${achievement.name}</div>
+                        <div class="achievement-desc">${achievement.desc}</div>
+                        ${achievement.unlocked ? `<div class="achievement-reward">奖励: 💰${achievement.reward.gold} 💎${achievement.reward.crystal}</div>` : ''}
+                    </div>
+                `;
+                
+                elements.achievementsList.appendChild(achievementElement);
+            });
+            
+            elements.achievementsPanel.style.display = 'block';
+        }
+        
+        // 解锁成就
+        function unlockAchievement(id) {
+            const achievement = gameData.achievements.find(a => a.id === id);
+            
+            if (achievement && !achievement.unlocked) {
+                achievement.unlocked = true;
+                
+                // 给予奖励
+                gameData.gold += achievement.reward.gold;
+                gameData.totalGold += achievement.reward.gold;
+                gameData.crystal += achievement.reward.crystal;
+                gameData.totalCrystal += achievement.reward.crystal;
+                
+                // 显示通知
+                alert(`成就解锁: ${achievement.name}\n获得奖励: 💰${achievement.reward.gold} 💎${achievement.reward.crystal}`);
+                
+                // 更新UI
+                updateUI();
+                
+                // 保存游戏数据
+                saveGameData();
+                
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // 检查塔防大师成就
+        function checkTowerMasterAchievement() {
+            const allTypesBuilt = Config.TOWER_TYPES.every(type => 
+                gameData.stats.towersByType[type] > 0
+            );
+            
+            if (allTypesBuilt) {
+                unlockAchievement('tower_master');
+            }
+        }
+        
+        // 检查状态大师成就
+        function checkStatusMasterAchievement() {
+            const allStatusApplied = Object.values(gameData.stats.statusApplied).every(count => count > 0);
+            
+            if (allStatusApplied) {
+                unlockAchievement('status_master');
+            }
+        }
+        
+        // 保存游戏数据
+        function saveGameData() {
+            const dataToSave = {
+                level: gameData.level,
+                gold: gameData.gold,
+                crystal: gameData.crystal,
+                totalGold: gameData.totalGold,
+                totalCrystal: gameData.totalCrystal,
+                maxBaseHealth: gameData.maxBaseHealth,
+                upgrades: gameData.upgrades,
+                achievements: gameData.achievements,
+                stats: gameData.stats
+            };
+            
+            localStorage.setItem('hanziTowerDefense', JSON.stringify(dataToSave));
+        }
+        
+        // 加载游戏数据
+        function loadGameData() {
+            const savedData = localStorage.getItem('hanziTowerDefense');
+            
+            if (savedData) {
+                try {
+                    const parsedData = JSON.parse(savedData);
+                    
+                    gameData.level = parsedData.level || 1;
+                    gameData.gold = parsedData.gold || Config.INITIAL_GOLD;
+                    gameData.crystal = parsedData.crystal || Config.INITIAL_CRYSTAL;
+                    gameData.totalGold = parsedData.totalGold || Config.INITIAL_GOLD;
+                    gameData.totalCrystal = parsedData.totalCrystal || Config.INITIAL_CRYSTAL;
+                    gameData.maxBaseHealth = parsedData.maxBaseHealth || Config.BASE_HEALTH;
+                    gameData.baseHealth = gameData.maxBaseHealth;
+                    
+                    if (parsedData.upgrades) {
+                        for (const type in parsedData.upgrades) {
+                            if (gameData.upgrades.hasOwnProperty(type)) {
+                                gameData.upgrades[type] = parsedData.upgrades[type] || 0;
+                            }
+                        }
+                    }
+                    
+                    if (parsedData.achievements) {
+                        gameData.achievements = parsedData.achievements;
+                    }
+                    
+                    if (parsedData.stats) {
+                        gameData.stats = {
+                            ...gameData.stats,
+                            ...parsedData.stats
+                        };
+                    }
+                } catch (e) {
+                    console.error('加载游戏数据失败:', e);
+                }
+            }
+        }
+        
+        // 重置游戏
+        function resetGame() {
+            if (confirm('确定要重置游戏吗?所有进度将丢失!')) {
+                localStorage.removeItem('hanziTowerDefense');
+                location.reload();
+            }
+        }
+        
+        // 绑定事件
+        function bindEvents() {
+            // 网格点击
+            elements.gridContainer.addEventListener('click', (e) => {
+                if (gameData.state !== GameState.READY && gameData.state !== GameState.WAVE_IN_PROGRESS) return;
+                
+                const cell = e.target.closest('.grid-cell');
+                if (!cell) return;
+                
+                const x = parseInt(cell.dataset.x);
+                const y = parseInt(cell.dataset.y);
+                
+                // 检查是否点击了塔
+                const tower = gameData.towers.find(t => t.x === x && t.y === y);
+                if (tower) {
+                    showTowerInfo(tower);
+                    return;
+                }
+                
+                // 检查是否可以放置塔
+                if (!gameData.grid[y][x].isPath && !gameData.grid[y][x].isBase) {
+                    showTowerSelect(x, y);
+                }
+            });
+            
+            // 开始波次按钮
+            elements.startWaveBtn.addEventListener('click', () => {
+                if (gameData.state === GameState.READY) {
+                    startWave();
+                }
+            });
+            
+            // 商店按钮
+            elements.shopBtn.addEventListener('click', showShop);
+            
+            // 教程按钮
+            elements.tutorialBtn.addEventListener('click', () => showTutorial(1));
+            
+            // 菜单按钮
+            elements.menuBtn.addEventListener('click', () => {
+                elements.modalTitle.textContent = '菜单';
+                elements.modalContent.innerHTML = `
+                    <button class="btn" style="width: 100%; margin-bottom: 10px;" id="continue-btn">继续游戏</button>
+                    <button class="btn btn-danger" style="width: 100%;" id="reset-btn">重置游戏</button>
+                `;
+                elements.modalOverlay.style.display = 'flex';
+                
+                // 绑定菜单按钮
+                document.getElementById('continue-btn').addEventListener('click', () => {
+                    elements.modalOverlay.style.display = 'none';
+                });
+                
+                document.getElementById('reset-btn').addEventListener('click', resetGame);
+            });
+            
+            // 塔信息关闭按钮
+            elements.towerInfoClose.addEventListener('click', () => {
+                elements.towerInfo.style.display = 'none';
+            });
+            
+            // 塔升级按钮
+            elements.towerUpgrade.addEventListener('click', () => {
+                const towerIndex = parseInt(elements.towerInfo.dataset.towerIndex);
+                if (!isNaN(towerIndex) && towerIndex >= 0 && towerIndex < gameData.towers.length) {
+                    upgradeTower(towerIndex);
+                }
+            });
+            
+            // 塔出售按钮
+            elements.towerSell.addEventListener('click', () => {
+                const towerIndex = parseInt(elements.towerInfo.dataset.towerIndex);
+                if (!isNaN(towerIndex) && towerIndex >= 0 && towerIndex < gameData.towers.length) {
+                    sellTower(towerIndex);
+                }
+            });
+            
+            // 模态框关闭按钮
+            elements.modalClose.addEventListener('click', () => {
+                elements.modalOverlay.style.display = 'none';
+            });
+            
+            // 模态框外部点击关闭
+            elements.modalOverlay.addEventListener('click', (e) => {
+                if (e.target === elements.modalOverlay) {
+                    elements.modalOverlay.style.display = 'none';
+                }
+            });
+            
+            // 重新开始按钮
+            elements.restartBtn.addEventListener('click', () => {
+                generateLevel();
+                elements.gameOver.style.display = 'none';
+            });
+            
+            // 下一关按钮
+            elements.nextLevelBtn.addEventListener('click', nextLevel);
+            
+            // 教程导航按钮
+            elements.tutorialPrev.addEventListener('click', () => {
+                const currentPage = parseInt(elements.tutorialPage.textContent.split('/')[0]);
+                showTutorial(currentPage - 1);
+            });
+            
+            elements.tutorialNext.addEventListener('click', () => {
+                const currentPage = parseInt(elements.tutorialPage.textContent.split('/')[0]);
+                showTutorial(currentPage + 1);
+            });
+            
+            // 成就按钮
+            elements.achievementsBtn.addEventListener('click', showAchievements);
+            
+            // 关闭成就面板按钮
+            elements.closeAchievementsBtn.addEventListener('click', () => {
+                elements.achievementsPanel.style.display = 'none';
+            });
+            
+            // 防止触摸滚动
+            document.addEventListener('touchmove', (e) => {
+                if (e.target === document.documentElement || e.target === document.body) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            // 窗口大小变化时重新定位元素
+            window.addEventListener('resize', () => {
+                gameData.towers.forEach(tower => {
+                    const cellSize = elements.gridContainer.clientWidth / Config.GRID_SIZE;
+                    const cell = gameData.grid[tower.y][tower.x].element;
+                    const rect = cell.getBoundingClientRect();
+                    const containerRect = elements.gridContainer.getBoundingClientRect();
+                    
+                    tower.element.style.left = `${rect.left - containerRect.left}px`;
+                    tower.element.style.top = `${rect.top - containerRect.top}px`;
+                    tower.element.style.width = `${cellSize}px`;
+                    tower.element.style.height = `${cellSize}px`;
+                });
+                
+                gameData.enemies.forEach(enemy => {
+                    updateEnemyPosition(enemy);
+                });
+            });
+        }
+        
+        // 启动游戏
+        window.addEventListener('load', () => {
+            initGame();
+            requestAnimationFrame(gameLoop);
+        });
+    </script>
+</body>
+</html>
